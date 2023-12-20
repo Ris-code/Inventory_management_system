@@ -30,55 +30,52 @@ func login(w http.ResponseWriter, r *http.Request) {
 		t, _ := template.ParseFiles("templates/signin.html")
 		t.Execute(w, nil)
 	} else {
-		// db, err = sql.Open("mysql", "root:rishav@2003@tcp(127.0.0.1:3306)/club")
 		r.ParseForm()
 		// logic part of log in
-		var login_username = r.FormValue("login-username")
-		var login_password = r.FormValue("login-password")
+		var loginUsername = r.FormValue("login-username")
+		var loginPassword = r.FormValue("login-password")
 
-		fmt.Println("username:", login_username)
-		fmt.Println("password:", login_password)
+		fmt.Println("username:", loginUsername)
+		fmt.Println("password:", loginPassword)
 
 		if err != nil {
 			// If there is something wrong with the request body, return a 400 status
-			w.WriteHeader(http.StatusBadRequest)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 		// Get the existing entry present in the database for the given username
-		result := db.QueryRow("select password from student where username=$1", login_username)
+		result := db.QueryRow("SELECT password FROM student WHERE username=?", loginUsername)
 		if err != nil {
 			// If there is an issue with the database, return a 500 error
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		if err != nil {
+		// Declare a variable to store the retrieved hashed password
+		var hashedPassword string
+
+		// Scan the result into the hashedPassword variable
+		if err := result.Scan(&hashedPassword); err != nil {
 			// If an entry with the username does not exist, send an "Unauthorized"(401) status
 			if err == sql.ErrNoRows {
-				w.WriteHeader(http.StatusUnauthorized)
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 			// If the error is of any other type, send a 500 status
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		// Compare the stored hashed password, with the hashed version of the password that was received
-		hashedPassword := []byte{}
-		if err := result.Scan(&hashedPassword); err != nil {
-			// If there is an issue with retrieving the hashed password from the database, return a 500 error
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		if err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(login_password)); err != nil {
+		// Compare the stored hashed password with the hashed version of the password that was received
+		if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginPassword)); err != nil {
 			// If the two passwords don't match, return a 401 status
-			w.WriteHeader(http.StatusUnauthorized)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
 		}
-		
-		fmt.Println("Record fetched successfully")
-		// If we reach this point, that means the users password was correct, and that they are authorized
+
+		// If we reach this point, that means the user's password was correct, and they are authorized
 		// The default 200 status is sent
+		fmt.Println("Login successful")
 	}
 }
 
