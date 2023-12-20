@@ -8,16 +8,31 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
+	"os"
+	"github.com/joho/godotenv"
 )
 
 var db *sql.DB
 var err error
 
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
+	// Initialize the database connection
+	initDB()
+}
+
 func initDB() {
-	var err error
-	// Connect to the postgres db
-	//you might have to change the connection string to add your database credentials
-	db, err = sql.Open("mysql", "root:rishav@2003@tcp(127.0.0.1:3306)/club")
+	// Read environment variables
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASS")
+	dbHost := os.Getenv("DB_HOST")
+
+	// Connect to the MySQL database
+	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/club", dbUser, dbPass, dbHost))
 	if err != nil {
 		panic(err)
 	}
