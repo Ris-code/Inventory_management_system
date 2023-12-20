@@ -1,6 +1,6 @@
-module github.com/ris-code/Go_practice
+module github.com/ris-code/INVENTORY_MANAGEMENT_SYSTEM
 
-go 1.19
+go 1.21.5
 
 require github.com/go-sql-driver/mysql v1.7.1
 
