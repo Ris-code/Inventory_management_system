@@ -38,6 +38,11 @@ func initDB() {
 	}
 }
 
+func club_option(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("templates/club1.html")
+	t.Execute(w, nil)
+}
+
 func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) //get request method
 
