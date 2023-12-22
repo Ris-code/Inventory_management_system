@@ -7,28 +7,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" type="text/css" href="/static/css/club1.css">
   <title>CSS Grid Cards</title>
-
-  <style>
-
-/* .heading-container {
-    display: flex;
-      text-align: center;
-      margin-bottom: 40px;
-      justify-content: center;
-    }
-
-    .heading {
-  
-      font-family: 'Dancing Script', cursive;
-      font-size: 50px;
-
-    } */
-  
-  </style>
+  <script src="/static/js/club_data.js"></script>
 </head>
 <body>
  
-<div>  
+<div class="main">  
     <div class="two alt-two">
             <h1 class="heading">Choose A Club
               <span>To Borrow The Inventory</span>
@@ -43,67 +26,95 @@
       <div class="card__text-wrapper">
         <p class="card__text">Look up at the night sky, and find yourself <strong>immersed</strong> in the amazing mountain range of Aspen.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL01')">Borrow<span>&rarr;</span></button>
     </div>
   </div>
 
   <div class="card">
     <img class="card__img" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Desert">
     <div class="card__content">
-      <h1 class="card__header">Misty mornings</h1>
+      <h1 class="card__header">Sangam</h1>
       <div class="card__text-wrapper">
         <p class="card__text">Capture the stunning <strong>essence</strong> of the early morning sunrise in the Californian wilderness, and surround yourself in a world you never even knew existed.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL02')">Borrow<span>&rarr;</span></button>
     </div>
   </div>
 
   <div class="card">
     <img class="card__img" src="https://images.unsplash.com/photo-1608178398319-48f814d0750c?q=80&w=1779&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
     <div class="card__content">
-      <h1 class="card__header">Utah sunsets</h1>
+      <h1 class="card__header">Nexus</h1>
       <div class="card__text-wrapper">
         <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL03')">Borrow<span>&rarr;</span></button>
     </div>
   </div>
 
   <div class="card">
     <img class="card__img" src="https://images.unsplash.com/photo-1502209877429-d7c6df9eb3f9?q=80&w=2066&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
     <div class="card__content">
-      <h1 class="card__header">Utah sunsets</h1>
+      <h1 class="card__header">FrameX</h1>
       <div class="card__text-wrapper">
         <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL04')">Borrow <span>&rarr;</span></button>
     </div>
   </div>
 
   <div class="card">
     <img class="card__img" src="https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
     <div class="card__content">
-      <h1 class="card__header">Utah sunsets</h1>
+      <h1 class="card__header">Shutterbugs</h1>
       <div class="card__text-wrapper">
         <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL05')">Borrow <span>&rarr;</span></button>
     </div>
   </div>
 
   <div class="card">
     <img class="card__img" src="https://plus.unsplash.com/premium_photo-1673514503542-3953ca855a03?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
     <div class="card__content">
-      <h1 class="card__header">Utah sunsets</h1>
+      <h1 class="card__header">Arteliers</h1>
       <div class="card__text-wrapper">
         <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
       </div>
-      <button class="card__btn">Explore <span>&rarr;</span></button>
+      <button class="card__btn" onclick="card('CL06')">Borrow<span>&rarr;</span></button>
     </div>
   </div>
 </div>
 </div>
 
+<!-- <script src="/static/js/club_data.js"></script> -->
+<!-- <script>
+  function card_1(id) {
+    // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log(id)
+    fetch(`/inventory/${encodeURIComponent(id)}/`, {
+        method: 'GET',
+        // headers: {
+        //     'Content-Type': 'application/json',
+        //     'X-CSRFToken': csrfToken,
+        // },
+    })
+    .then(response => response.json())
+    .then(data => {
+        
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script> -->
+<script>
+  function card(id) {
+    // Construct the URL for the inventory page with the provided ID
+    const inventoryURL = `/inventory/${encodeURIComponent(id)}/`;
+    
+    // Redirect to the inventory page
+    window.location.href = inventoryURL;
+}
+</script>
 
 </body>
 </html>

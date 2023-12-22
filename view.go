@@ -10,11 +10,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"github.com/joho/godotenv"
+	"github.com/gorilla/mux"
+	"encoding/json"
 )
 
 var db *sql.DB
 var err error
 
+type item_info struct{
+	Club string
+	Items []string
+	Quantity []int
+}
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -41,6 +48,80 @@ func initDB() {
 func club_option(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("templates/club1.html")
 	t.Execute(w, nil)
+}
+
+func inventory(w http.ResponseWriter, r *http.Request){
+	fmt.Println("method:", r.Method)
+	t, _ := template.ParseFiles("templates/inventory.html")
+
+	vars := mux.Vars(r)
+    id := vars["ID"]
+	fmt.Println("ID:", id)
+
+	result := db.QueryRow("SELECT club FROM clubs WHERE club_id=?", id)
+
+	var club string
+	
+	if err := result.Scan(&club); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Club:", club)
+
+	join_output, err := db.Query("SELECT items.item, items.quantity, items.club_id FROM items INNER JOIN clubs ON clubs.club_id=items.club_id WHERE items.club_id=?", id)
+
+	// fmt.Println(join_output)
+	if err != nil {
+        // Handle the error (log it or return an error response)
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+    defer join_output.Close()
+
+	join_arr := []string{}
+	join_arr_quantity := []int{}
+
+	for join_output.Next() {
+		var item string
+		var quantity int
+		var club_id string
+
+		err = join_output.Scan(&item, &quantity, &club_id)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		join_arr = append(join_arr, item)
+		join_arr_quantity = append(join_arr_quantity, quantity)
+	}
+
+	fmt.Println("Items:", join_arr)
+	fmt.Println("Quantity:", join_arr_quantity)
+
+
+	temp := item_info{
+		Club: club,
+		Items: join_arr,
+		Quantity: join_arr_quantity,
+	}
+
+	// Convert the struct to JSON
+	jsonData, err := json.Marshal(temp)
+	if err != nil {
+		// Handle the error
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Render the template with the JSON data
+	t.Execute(w, template.JS(jsonData))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
