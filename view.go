@@ -18,10 +18,17 @@ var db *sql.DB
 var err error
 
 type item_info struct{
+	Item_id []string
 	Club string
 	Items []string
 	Quantity []int
 }
+
+type Item struct {
+	ItemID   []string `json:"itemID"`
+	Quantity []int    `json:"Quantity"`
+}
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -50,6 +57,50 @@ func club_option(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
+func cart(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("templates/cart.html")
+	t.Execute(w, nil)
+}
+
+func update(w http.ResponseWriter, r *http.Request) {
+	var updateItem Item
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&updateItem); err != nil {
+		http.Error(w, "Failed to decode JSON", http.StatusBadRequest)
+		return
+	}
+
+	for idx, itemID := range updateItem.ItemID {
+		fmt.Println("Item ID:", itemID)
+		fmt.Println("Quantity:", updateItem.Quantity[idx])
+
+		value := db.QueryRow("SELECT quantity FROM items WHERE item_id=?", itemID)
+		// Update the quantity of the item in the database
+		var val int
+		if err := value.Scan(&val); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
+		
+		updated_value:=val-updateItem.Quantity[idx]
+
+		_, err := db.Exec("UPDATE items SET quantity=? WHERE item_id=?", updated_value, itemID)
+
+		if err != nil {
+			// If there is an issue with the database, return a 500 error
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+	fmt.Println("Item ID:", updateItem.ItemID)
+	fmt.Println("Quantity:", updateItem.Quantity)
+
+}
+
 func inventory(w http.ResponseWriter, r *http.Request){
 	fmt.Println("method:", r.Method)
 	t, _ := template.ParseFiles("templates/inventory.html")
@@ -75,7 +126,7 @@ func inventory(w http.ResponseWriter, r *http.Request){
 
 	fmt.Println("Club:", club)
 
-	join_output, err := db.Query("SELECT items.item, items.quantity, items.club_id FROM items INNER JOIN clubs ON clubs.club_id=items.club_id WHERE items.club_id=?", id)
+	join_output, err := db.Query("SELECT  items.item_id, items.item, items.quantity, items.club_id FROM items INNER JOIN clubs ON clubs.club_id=items.club_id WHERE items.club_id=?", id)
 
 	// fmt.Println(join_output)
 	if err != nil {
@@ -86,20 +137,23 @@ func inventory(w http.ResponseWriter, r *http.Request){
     defer join_output.Close()
 
 	join_arr := []string{}
+	join_arr_id := []string{}
 	join_arr_quantity := []int{}
 
 	for join_output.Next() {
+		var item_id string
 		var item string
 		var quantity int
 		var club_id string
 
-		err = join_output.Scan(&item, &quantity, &club_id)
+		err = join_output.Scan(&item_id, &item, &quantity, &club_id)
 		if err != nil {
 			panic(err.Error())
 		}
 
 		join_arr = append(join_arr, item)
 		join_arr_quantity = append(join_arr_quantity, quantity)
+		join_arr_id = append(join_arr_id, item_id)
 	}
 
 	fmt.Println("Items:", join_arr)
@@ -107,6 +161,7 @@ func inventory(w http.ResponseWriter, r *http.Request){
 
 
 	temp := item_info{
+		Item_id: join_arr_id,
 		Club: club,
 		Items: join_arr,
 		Quantity: join_arr_quantity,

@@ -19,6 +19,8 @@ func main() {
 	r.HandleFunc("/signin/", login)
 	r.HandleFunc("/club/", club_option)
 	r.HandleFunc("/inventory/{ID}/", inventory)
+	r.HandleFunc("/cart/", cart)
+	r.HandleFunc("/update/", update)
 
 	http.Handle("/", r)
 

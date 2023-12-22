@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -20,19 +20,19 @@
                 </div>
             </section>
             <div class="row product-list" id="product-list-container">
-                <!-- Product cards will be dynamically added here using JavaScript -->
+           
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <!-- <script src="/static/js/inventory.js"></script> -->
+ 
     <script>
         console.log('{{.}}');
 
         const backendData = JSON.parse('{{.}}');
 
-        // Access the properties as needed
+        
         const clubInfo = backendData.Club;
         const items = backendData.Items;
         const quantities = backendData.Quantity;
@@ -41,7 +41,7 @@
         console.log(items);
         console.log(quantities);
 
-        // Function to create a product card
+
         function createProductCard(item, quantity) {
             const cardContainer = document.getElementById("product-list-container");
 
@@ -64,7 +64,6 @@
             cardContainer.appendChild(card);
         }
 
-        // Create product cards using data from the backend
         for (let i = 0; i < items.length; i++) {
             createProductCard(items[i], quantities[i]);
         }
@@ -72,4 +71,323 @@
     </script>
 </body>
 
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Shop product list - Bootdey.com</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/css/inventory.css" />
+    <!-- ... (your HTML head) ... -->
+<!-- ... (your HTML head) ... -->
+<style>
+    .pro-img-box {
+        display: flex;
+        justify-content: center;
+        padding: 5px;
+        align-items: center;
+        gap: 10px;
+        text-align: center; 
+    }
+
+    .pro-img-box .item-name span {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+
+    .pro-img-box div {
+        flex: 1;
+    }
+
+    .pro-img-box button {
+        background-color: #FFC107;
+        color: black;
+        gap: 5px;
+        display: flex;
+        /* flex-direction: column; */
+    }
+
+    .pro-img-box input {
+        width: 100%; /* Adjust the width as needed */
+    }
+
+    .pro-title {
+        color: #5A5A5A;
+        font-size: 20px;
+    }
+
+    .add-to-cart-btn {
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .panel-body button{
+        background-color: #FFC107;
+        color: black;
+        font-size: large;
+    }
+
+    .panel-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-body a {
+        color: black; /* Set the color to black */
+        font-size: 24px; /* Increase the font size */
+        text-decoration: none; /* Remove the underline */
+    }
+
+    .hello {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        margin-top: 0px;
+        padding-top: 0px;
+    }
+
+    .hello a {
+        color: black; /* Set the color to black */
+        font-size: 24px; /* Increase the font size */
+        font-weight: bold;
+        font-style: italic;
+        text-decoration: none; /* Remove the underline */
+    }
+
+</style>
+
+<!-- ... (your HTML head) ... -->
+<!-- ... (your HTML head) ... -->
+</head>
+
+<body>
+    <div class="container bootdey">
+        <div class="col-md-12">
+            <div class="hello">
+                <a class="typewrite"></a>
+            </div>
+            <section class="panel">
+                <div class="panel-body">
+                    <input type="text" placeholder="Keyword Search" class="form-control" />
+                    <a href="/club/"><i class="fas fa-home"></i></a>
+                    <button class="btn bootstrap-shopping-carts btn-block" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
+                </div>
+            </section>
+            <div class="row product-list" id="product-list-container">
+                <!-- Product cards will be dynamically added here using JavaScript -->
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script>
+            console.log('{{.}}');
+
+            const backendData = JSON.parse('{{.}}');
+
+            // Access the properties as needed
+            const clubInfo = backendData.Club;
+            const items = backendData.Items;
+            const quantities = backendData.Quantity;
+            const item_id = backendData.Item_id;
+
+            console.log(clubInfo);
+            console.log(items);
+            console.log(quantities);
+
+            // Function to create a product card
+            function createProductCard(item, quantity, item_id) {
+                const cardContainer = document.getElementById("product-list-container");
+
+                const card = document.createElement("div");
+                card.className = "col-md-4";
+                card.innerHTML = `
+                    <section class="panel">
+                        <div class="pro-img-box">
+                            <div class="item-name">
+                            <span>
+                                <h3 class="pro-title">${item}</h3>
+                            </span>
+                            </div>
+                            <div>
+                              <input class="quantity-input" min="0" max="${quantity}" name="quantity" value="${quantity}" type="number"
+                                  class="form-control form-control-sm" />
+                            </div>
+                            <div>
+                            <button class="btn add-to-cart-btn" data-item="${item}" data-quantity="${quantity}" data-item-id="${item_id}">
+                                Add Item
+                            </button>
+                            
+                            <button class="btn remove-to-cart-btn" data-item="${item}" data-quantity="${quantity}" data-item-id="${item_id}">
+                                Remove item
+                            </button>
+                            </div>
+                        </div>
+                    </section>
+                `;
+
+                cardContainer.appendChild(card);
+            }
+
+            // Create product cards using data from the backend
+            for (let i = 0; i < items.length; i++) {
+                createProductCard(items[i], quantities[i], item_id[i]);
+            }
+
+            // Shopping cart array to store selected items
+            const shoppingCart = [];
+
+            // Add click event listener to dynamically created buttons
+            document.addEventListener('click', function (event) {
+            if (event.target.classList.contains('add-to-cart-btn')) {
+                const item = event.target.getAttribute('data-item');
+                const quantityInput = event.target.closest('.pro-img-box').querySelector('.quantity-input');
+                const item_id = event.target.getAttribute('data-item-id');
+
+                const selectedItem = {
+                    item_id: item_id,
+                    item: item,
+                    quantity: parseInt(quantityInput.value),
+                };
+                shoppingCart.push(selectedItem);
+                event.target.disabled = true;
+                event.target.textContent = 'Added to Cart';
+                logShoppingCart();
+            }
+
+            if (event.target.classList.contains('remove-to-cart-btn')) {
+                const item = event.target.getAttribute('data-item');
+                const quantityInput = event.target.closest('.pro-img-box').querySelector('.quantity-input');
+                const item_id = event.target.getAttribute('data-item-id');
+                
+                const selectedItem = {
+                    item_id: item_id,
+                    item: item,
+                    quantity: parseInt(quantityInput.value),
+                };
+                
+                // Remove the item from the shoppingCart array
+                const index = shoppingCart.findIndex(item => item.item === selectedItem.item);
+                if (index !== -1) {
+                    shoppingCart.splice(index, 1);
+                }
+                
+                // Enable the corresponding 'add-to-cart-btn'
+                const addButton = document.querySelector(`.add-to-cart-btn[data-item="${selectedItem.item}"]`);
+                if (addButton) {
+                    addButton.disabled = false;
+                    addButton.textContent = 'Add to Cart';
+                }
+
+                logShoppingCart();
+            }
+        });
+
+            // Log the shopping cart array
+            function logShoppingCart() {
+                console.log('Shopping Cart:', shoppingCart);
+            }
+
+            function cart() {
+                const cartData = JSON.stringify(shoppingCart);
+                console.log(cartData);
+                
+                // Append the JSON string as a query parameter to the URL
+                window.location.href = `/cart/?data=${cartData}`;
+            }
+    
+            // function decrementQuantity(button, index) {
+            //     const input = button.parentNode.querySelector('input[type=number]');
+            //     if (input.value > 0) {
+            //     input.stepDown();
+            //     }
+            // }
+  
+            // // Function to increment quantity
+            // function incrementQuantity(button, index, maxQuantity) {
+            //     const input = button.parentNode.querySelector('input[type=number]');
+            //     if (input.value < maxQuantity) {
+            //     input.stepUp();
+            //     }
+            // }
+            var TxtType = function (el, toRotate, period) {
+                     this.toRotate = toRotate;
+                     this.el = el;
+                     this.loopNum = 0;
+                     this.period = parseInt(period, 10) || 2000;
+                     this.txt = '';
+                     this.tick();
+                     this.isDeleting = false;
+                 };
+         
+                 TxtType.prototype.tick = function () {
+                     var i = this.loopNum % this.toRotate.length;
+                     var fullTxt = this.toRotate[i];
+         
+                     if (this.isDeleting) {
+                         this.txt = fullTxt.substring(0, this.txt.length - 1);
+                     } else {
+                         this.txt = fullTxt.substring(0, this.txt.length + 1);
+                     }
+         
+                     this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
+         
+                     var that = this;
+                     var delta = 200 - Math.random() * 100;
+         
+                     if (this.isDeleting) { delta /= 2; }
+         
+                     if (!this.isDeleting && this.txt === fullTxt) {
+                         delta = this.period;
+                         this.isDeleting = true;
+                     } else if (this.isDeleting && this.txt === '') {
+                         this.isDeleting = false;
+                         this.loopNum++;
+                         delta = 500;
+                     }
+         
+                     setTimeout(function () {
+                         that.tick();
+                     }, delta);
+                 };
+         
+                 window.onload = function () {
+                     const clubInfo = backendData.Club;
+                     console.log(clubInfo)
+         
+                     // Dynamically set the data-type attribute
+                     const typewriteElement = document.querySelector('.typewrite');
+                     typewriteElement.setAttribute('data-type', `["Hey, Welcome to ${clubInfo}", "Add the inventory you want to borrow", "Move to borrow cart to checkout the borrow list", "Thank you for visiting ${clubInfo}"]`);
+         
+                     // Initialize the typewrite effect
+                     var elements = document.getElementsByClassName('typewrite');
+                     for (var i = 0; i < elements.length; i++) {
+                         var toRotate = elements[i].getAttribute('data-type');
+                         var period = elements[i].getAttribute('data-period');
+                         if (toRotate) {
+                             new TxtType(elements[i], JSON.parse(toRotate), period);
+                         }
+                     }
+         
+                     // INJECT CSS
+                     var css = document.createElement("style");
+                     css.type = "text/css";
+                     css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
+                     document.body.appendChild(css);
+                 };
+
+        </script>
+        <script>
+            
+         </script>
+    </body>
 </html>
