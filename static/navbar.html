@@ -1,0 +1,309 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+            /* Converted SCSS to CSS */
+
+        /* Variables */
+        :root {
+        --color-primary: #f857a8;
+        --color-secondary: #ff5858;
+        --color-neutral-lt: black;
+        --color-neutral-med: #e8a9a9;
+        --color-neutral-dk: #e78383;
+        --a-tags: "a, a:active, a:hover, a:visited";
+        --a-tags-no-hov: "a:link, a:visited, a:active";
+        --headings-font: "Saira Semi Condensed", sans-serif;
+        --shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mixins */
+        @keyframes logo-hover {
+        20% {
+            padding-right: 0em;
+        }
+        100% {
+            padding-right: 5em;
+        }
+        }
+
+        /* Reset */
+        button {
+        background: none;
+        box-shadow: none;
+        border: none;
+        cursor: pointer;
+        }
+
+        button:focus,
+        input:focus {
+        outline: 0;
+        }
+
+        html {
+        scroll-behavior: smooth;
+        }
+
+        /* Layout */
+        body {
+        line-height: 1.5em;
+        padding: 0;
+        margin: 0;
+        }
+
+        section {
+        height: 100vh;
+        }
+
+        #home {
+        background-color: #ddd;
+        }
+
+        #about {
+        background-color: #aaa;
+        }
+
+        #work {
+        background-color: #888;
+        }
+
+        #contact {
+        background-color: #666;
+        }
+
+        /* Helpers */
+        .skew {
+        transform: skew(-20deg);
+        }
+
+        .un-skew {
+        transform: skew(20deg);
+        }
+
+        /* Nav */
+        #nav-wrapper {
+        overflow: hidden;
+        width: 100%;
+        margin: 0 auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        }
+
+        /* #nav {
+        background-color: var(--color-neutral-lt);
+        backdrop-filter: opacity(0.2);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        font-family: var(--headings-font);
+        height: 6em;
+        overflow: hidden;
+        } */
+
+        #nav {
+  background-color: rgba(0, 0, 0, 0.8); /* Adjust the alpha value (last parameter) for the desired level of translucency */
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--headings-font);
+  height: 6em;
+  overflow: hidden;
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+}
+
+
+        #nav.nav-visible {
+        height: 100%;
+        overflow: auto;
+        }
+
+        .nav {
+        display: flex;
+        height: 6em;
+        line-height: 6em;
+        flex-grow: 1;
+        }
+
+        .nav-link,
+        .logo {
+        padding: 0 1em;
+        }
+
+        span.gradient {
+        background: var(--color-primary);
+        background: -webkit-linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+        padding: 0 1em;
+        position: relative;
+        right: 1em;
+        margin-right: auto;
+        }
+
+        span.gradient:hover {
+        animation-name: logo-hover;
+        animation-duration: 0.3s;
+        animation-fill-mode: forwards;
+        /* animation-timing-function: cubic-bezier(0.17, 0.57, 0.30, 0.85); */
+        animation-timing-function: cubic-bezier(0, 0, 0, 0);
+        }
+
+        h1.logo {
+        font-weight: 300;
+        font-size: 1.75em;
+        line-height: 0.75em;
+        color: var(--color-neutral-lt);
+        }
+
+        h1.logo a, h1.logo a:link, h1.logo a:visited, h1.logo a:active {
+        text-decoration: none;
+        color: var(--color-neutral-dk);
+        }
+
+        .nav-link {
+        text-transform: uppercase;
+        text-align: center;
+        border-top: 0.5px solid var(--color-neutral-med);
+        }
+
+        a, a:link, a:visited, a:active {
+        text-decoration: none;
+        color: var(--color-primary);
+        }
+
+        a:hover {
+        text-decoration: underline;
+        }
+
+        .right {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        }
+
+        .btn-nav {
+        color: var(--color-primary);
+        padding-left: 2em;
+        padding-right: 2em;
+        }
+
+        @media (min-width: 800px) {
+        #nav-wrapper {
+            overflow: hidden;
+        }
+
+        #nav {
+            overflow: hidden;
+            flex-direction: row;
+        }
+
+        .nav-link {
+            border-top: none;
+        }
+
+        .right {
+            overflow: hidden;
+            flex-direction: row;
+            justify-content: flex-end;
+            position: relative;
+            left: 1.5em;
+            height: auto;
+        }
+
+        .btn-nav {
+            display: none;
+        }
+
+        a, a:link, a:visited, a:active {
+            &.active {
+            background: var(--color-primary);
+            color: #fff;
+            }
+        }
+
+        .nav-link-span {
+            transform: skew(20deg);
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .nav-link {
+            transform: skew(-20deg);
+            color: #777;
+            text-decoration: none;
+
+            &:last-child {
+            padding-right: 3em;
+            }
+        }
+
+        a:hover.nav-link:not(.active) {
+            color: var(--color-neutral-dk);
+            background: var(--color-neutral-med);
+            background: linear-gradient(45deg, var(--color-neutral-dk));
+        }
+        }
+
+  </style>
+</head>
+
+<body>
+
+    <div id="nav-wrapper">
+        <nav id="nav">
+          <div class="nav left">
+            <span class="gradient skew"><h1 class="logo un-skew"><a href="/home/">Logo Here</a></h1></span>
+            <button id="menu" class="btn-nav"><span class="fas fa-bars"></span></button>
+          </div>
+          <div class="nav right">
+            <a href="/home/" class="nav-link active"><span class="nav-link-span"><span class="u-nav">Home</span></span></a>
+            <a href="/club/" class="nav-link"><span class="nav-link-span"><span class="u-nav">Clubs</span></span></a>
+            <a href="#work" class="nav-link"><span class="nav-link-span"><span class="u-nav">Borrow List</span></span></a>
+            <a href="#contact" class="nav-link"><span class="nav-link-span"><span class="u-nav">About</span></span></a>
+          </div>
+        </nav>
+    </div>
+<script>
+    var util = {
+  mobileMenu() {
+    $("#nav").toggleClass("nav-visible");
+  },
+  windowResize() {
+    if ($(window).width() > 800) {
+      $("#nav").removeClass("nav-visible");
+    }
+  },
+  scrollEvent() {
+    var scrollPosition = $(document).scrollTop();
+    
+    $.each(util.scrollMenuIds, function(i) {
+      var link = util.scrollMenuIds[i],
+          container = $(link).attr("href"),
+          containerOffset = $(container).offset().top,
+          containerHeight = $(container).outerHeight(),
+          containerBottom = containerOffset + containerHeight;
+
+      if (scrollPosition < containerBottom - 20 && scrollPosition >= containerOffset - 20) {
+        $(link).addClass("active");
+      } else {
+        $(link).removeClass("active");
+      }
+    });
+  }
+};
+
+$(document).ready(function() {
+  
+  util.scrollMenuIds = $("a.nav-link[href]");
+  $("#menu").click(util.mobileMenu);
+  $(window).resize(util.windowResize);
+  $(document).scroll(util.scrollEvent);
+  
+});
+
+</script>
+</body>
+</html>

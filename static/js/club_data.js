@@ -5,97 +5,41 @@ function card(id) {
     // Redirect to the inventory page
     window.location.href = inventoryURL;
 }
-// function card_1(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     redirectToInventory(id);
-// }
 
-// function card_2(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     fetch(`/inventory/${encodeURIComponent(id)}/`, {
-//         method: 'GET',
-//         // headers: {
-//         //     'Content-Type': 'application/json',
-//         //     'X-CSRFToken': csrfToken,
-//         // },
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-        
-//     })
-//     .catch(error => console.error('Error:', error));
-// }
-
-// function card_3(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     fetch(`/inventory/${encodeURIComponent(id)}/`, {
-//         method: 'GET',
-//         // headers: {
-//         //     'Content-Type': 'application/json',
-//         //     'X-CSRFToken': csrfToken,
-//         // },
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-        
-//     })
-//     .catch(error => console.error('Error:', error));
-//     window.location.href = `/inventory/${encodeURIComponent(id)}/`;
-// }
-
-// function card_4(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     fetch(`/inventory/${encodeURIComponent(id)}/`, {
-//         method: 'GET',
-//         // headers: {
-//         //     'Content-Type': 'application/json',
-//         //     'X-CSRFToken': csrfToken,
-//         // },
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-        
-//     })
-//     .catch(error => console.error('Error:', error));
-//     window.location.href = `/inventory/${encodeURIComponent(id)}/`;
-// }
-
-// function card_5(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     fetch(`/inventory/${encodeURIComponent(id)}/`, {
-//         method: 'GET',
-//         // headers: {
-//         //     'Content-Type': 'application/json',
-//         //     'X-CSRFToken': csrfToken,
-//         // },
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-        
-//     })
-//     .catch(error => console.error('Error:', error));
-//     window.location.href = `/inventory/${encodeURIComponent(id)}/`;
-// }
-
-// function card_6(id) {
-//     // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-//     console.log(id)
-//     fetch(`/inventory/${encodeURIComponent(id)}/`, {
-//         method: 'GET',
-//         // headers: {
-//         //     'Content-Type': 'application/json',
-//         //     'X-CSRFToken': csrfToken,
-//         // },
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-        
-//     })
-//     .catch(error => console.error('Error:', error));
-//     window.location.href = `/inventory/${encodeURIComponent(id)}/`;
-// }
+var util = {
+    mobileMenu() {
+      $("#nav").toggleClass("nav-visible");
+    },
+    windowResize() {
+      if ($(window).width() > 800) {
+        $("#nav").removeClass("nav-visible");
+      }
+    },
+    scrollEvent() {
+      var scrollPosition = $(document).scrollTop();
+      
+      $.each(util.scrollMenuIds, function(i) {
+        var link = util.scrollMenuIds[i],
+            container = $(link).attr("href"),
+            containerOffset = $(container).offset().top,
+            containerHeight = $(container).outerHeight(),
+            containerBottom = containerOffset + containerHeight;
+  
+        if (scrollPosition < containerBottom - 20 && scrollPosition >= containerOffset - 20) {
+          $(link).addClass("active");
+        } else {
+          $(link).removeClass("active");
+        }
+      });
+    }
+  };
+  
+  $(document).ready(function() {
+    
+    util.scrollMenuIds = $("a.nav-link[href]");
+    $("#menu").click(util.mobileMenu);
+    $(window).resize(util.windowResize);
+    $(document).scroll(util.scrollEvent);
+    
+  });
+  

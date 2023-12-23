@@ -6,6 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
 	// "github.com/gin-gonic/gin"
 )
 
@@ -15,6 +16,8 @@ func main() {
 
 	fs := http.FileServer(http.Dir("static"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
+	r.HandleFunc("/", home_before_login)
+	r.HandleFunc("/home/", home_after_login)
 	r.HandleFunc("/signup/", signup)
 	r.HandleFunc("/signin/", login)
 	r.HandleFunc("/club/", club_option)
@@ -22,7 +25,15 @@ func main() {
 	r.HandleFunc("/cart/", cart)
 	r.HandleFunc("/update/", update)
 
-	http.Handle("/", r)
+
+	 // Enable CORS
+	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"*"})
+	http.Handle("/", handlers.CORS(headers, methods, origins)(r))
+	// http.Handle("/", r)
+
+
 
 	err := http.ListenAndServe(":8080", nil) // setting listening port
 	if err != nil {

@@ -24,9 +24,20 @@ type item_info struct{
 	Quantity []int
 }
 
+type club_info struct{
+	Club_id []string
+	Club []string
+	Info []string
+	Link []string
+}
+
 type Item struct {
 	ItemID   []string `json:"itemID"`
 	Quantity []int    `json:"Quantity"`
+}
+
+type user struct {
+	Username string 
 }
 
 func init() {
@@ -52,9 +63,116 @@ func initDB() {
 	}
 }
 
-func club_option(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("templates/club1.html")
+func home_before_login(w http.ResponseWriter, r *http.Request) {	
+	t, _ := template.ParseFiles("templates/home_before_login.html")
 	t.Execute(w, nil)
+}
+
+func home_after_login(w http.ResponseWriter, r *http.Request) {	
+
+	// vars := mux.Vars(r)
+    // username := vars["username"]
+
+	// r.ParseForm()
+
+	// username := r.FormValue("username")
+
+	// fmt.Println("Username:", username)
+
+	// result := db.QueryRow("SELECT name FROM student WHERE username=?", username)
+
+	// var name string
+
+	// if err := result.Scan(&name); err != nil {
+	// 	// If an entry with the username does not exist, send an "Unauthorized"(401) status
+	// 	if err == sql.ErrNoRows {
+	// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	// 		return
+	// 	}
+	// 	// If the error is of any other type, send a 500 status
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+	
+	// temp := user{
+	// 	Username: name,
+	// }
+
+	// // Convert the struct to JSON
+	// jsonData, err := json.Marshal(temp)
+	// if err != nil {
+	// 	// Handle the error
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// fmt.Println("Name:", name)
+	t, _ := template.ParseFiles("templates/home_after_login.html")
+	t.Execute(w, nil);
+
+}
+
+
+
+func club_option(w http.ResponseWriter, r *http.Request) {
+
+	join_output, err := db.Query("SELECT * FROM clubs")
+
+	// fmt.Println(join_output)
+	if err != nil {
+        // Handle the error (log it or return an error response)
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+    defer join_output.Close()
+
+	id_arr := []string{}
+	club_arr := []string{}
+	info_arr := []string{}
+	photolink_arr := []string{}
+
+	for join_output.Next() {
+		var id string
+		var club string
+		var info string
+		var link string
+
+		err = join_output.Scan(&id, &club, &info, &link)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		id_arr = append(id_arr, id)
+		club_arr = append(club_arr, club)
+		info_arr = append(info_arr, info)
+		photolink_arr = append(photolink_arr, link)
+	}
+
+	fmt.Println("ID:", id_arr)
+	fmt.Println("Club:", club_arr)
+	fmt.Println("Info:", info_arr)
+	fmt.Println("Photo Link:", photolink_arr)
+
+
+	temp := club_info{
+		Club_id: id_arr,
+		Club: club_arr,
+		Info: info_arr,
+		Link: photolink_arr,
+	}
+
+	// Convert the struct to JSON
+	jsonData, err := json.Marshal(temp)
+	if err != nil {
+		// Handle the error
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Render the template with the JSON data
+	t, _ := template.ParseFiles("templates/club1.html")
+	t.Execute(w, template.JS(jsonData))
+	
 }
 
 func cart(w http.ResponseWriter, r *http.Request) {
@@ -180,63 +298,88 @@ func inventory(w http.ResponseWriter, r *http.Request){
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) //get request method
+	fmt.Println("method:", r.Method) // get request method
 
 	if r.Method == "GET" {
-		t, _ := template.ParseFiles("templates/signin.html")
-		t.Execute(w, nil)
-	} else {
-		r.ParseForm()
-		// logic part of log in
-		var loginUsername = r.FormValue("login-username")
-		var loginPassword = r.FormValue("login-password")
-
-		fmt.Println("username:", loginUsername)
-		fmt.Println("password:", loginPassword)
-
-		if err != nil {
-			// If there is something wrong with the request body, return a 400 status
-			http.Error(w, "Bad Request", http.StatusBadRequest)
-			return
-		}
-		// Get the existing entry present in the database for the given username
-		result := db.QueryRow("SELECT password FROM student WHERE username=?", loginUsername)
-		if err != nil {
-			// If there is an issue with the database, return a 500 error
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		// Declare a variable to store the retrieved hashed password
-		var hashedPassword string
-
-		// Scan the result into the hashedPassword variable
-		if err := result.Scan(&hashedPassword); err != nil {
-			// If an entry with the username does not exist, send an "Unauthorized"(401) status
-			if err == sql.ErrNoRows {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-			// If the error is of any other type, send a 500 status
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		// Compare the stored hashed password with the hashed version of the password that was received
-		if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginPassword)); err != nil {
-			// If the two passwords don't match, return a 401 status
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		// If we reach this point, that means the user's password was correct, and they are authorized
-		// The default 200 status is sent
-		fmt.Println("Login successful")
+		// Serve the login page
+		http.ServeFile(w, r, "templates/signin.html")
+		return
 	}
+
+	r.ParseForm()
+	// logic part of log in
+	loginUsername := r.FormValue("username")
+	loginPassword := r.FormValue("password")
+
+	fmt.Println("username:", loginUsername)
+	fmt.Println("password:", loginPassword)
+
+	// Get the existing entry present in the database for the given username
+	result := db.QueryRow("SELECT password FROM student WHERE username=?", loginUsername)
+	result1 := db.QueryRow("SELECT name FROM student WHERE username=?", loginUsername)
+
+	// Declare a variable to store the retrieved hashed password
+	var hashedPassword string
+	var name string
+
+	if err := result1.Scan(&name); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Name:", name)
+
+	// Scan the result into the hashedPassword variable
+	if err := result.Scan(&hashedPassword); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+    
+
+	// Compare the stored hashed password with the hashed version of the password that was received
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginPassword)); err != nil {
+		// If the two passwords don't match, return a 401 status
+		fmt.Println("unsuccessfull")
+		w.Write([]byte("unsuccessfull"))
+		// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	fmt.Println("success")
+	// If we reach this point, that means the user's password was correct, and they are authorized
+	// Send a success response to the client
+	temp := user{
+		Username: name,
+	}
+
+	// Convert the struct to JSON
+	jsonData, err := json.Marshal(temp)
+	if err != nil {
+		// Handle the error
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Name:", name)
+	w.Write([]byte(jsonData))	
 }
 
+
 func signup(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) //get request method
+	fmt.Println("method:", r.Method) // get request method
 
 	if r.Method == "GET" {
 		t, _ := template.ParseFiles("templates/signup.html")
@@ -246,14 +389,44 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		// logic part of sign up
 		var username = r.FormValue("username")
 		var password = r.FormValue("password")
+		var confirm_password = r.FormValue("confirm-password")
 		var name = r.FormValue("name")
 
+		fmt.Println("username:", username)
+		fmt.Println("password:", password)
+		fmt.Println("confirm-password:", confirm_password)
+		fmt.Println("name:", name)
+		// Check if username already exists
+		result := db.QueryRow("SELECT username FROM student WHERE username=?", username)
+
+		var existingUsername string
+		err := result.Scan(&existingUsername)
+
+		if err == nil {
+			// Username already exists
+			fmt.Println("Username already exists")
+			w.Write([]byte("username"))
+			
+			return
+		} else if err != sql.ErrNoRows {
+			// If the error is of any other type, send a 500 status
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		if password != confirm_password {
+			// Passwords do not match
+			w.Write([]byte("password"))
+			http.Redirect(w, r, "/signup/", http.StatusSeeOther)
+			return
+		}
+
+		// Hash the password
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
 
-		fmt.Println("username:", username)
-		fmt.Println("password:", hashedPassword)
-		fmt.Println("name:", name)
+		
 
+		// Insert the new user into the database
 		insert, err := db.Prepare("INSERT INTO student (username, name, password) VALUES (?, ?, ?)")
 		if err != nil {
 			panic(err.Error())
@@ -268,6 +441,6 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		fmt.Println("Record inserted successfully")
+		w.Write([]byte("success"))
 	}
 }
-

@@ -67,13 +67,6 @@
     font-size: 15px;
 } */
 
-body {
-    margin-top: 0px;
-    background: #f57272;
-    padding-top:2em;
-}
-
-* { color:#000000; text-decoration: none;}
 
 .panel-body {
     display: flex;

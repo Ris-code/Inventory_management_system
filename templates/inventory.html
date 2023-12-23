@@ -83,9 +83,35 @@
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link type="text/css" rel="stylesheet" href="/static/css/inventory.css" />
-    <!-- ... (your HTML head) ... -->
-<!-- ... (your HTML head) ... -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(function(){
+        $("#nav-container").load("/static/navbar.html");
+      });
+    </script>
 <style>
+    :root {
+    --color-primary: #f857a8;
+    --color-secondary: #ff5858;
+    --color-neutral-lt: black;
+    --color-neutral-med: #e8a9a9;
+    --color-neutral-dk: #e78383;
+    --a-tags: "a, a:active, a:hover, a:visited";
+    --a-tags-no-hov: "a:link, a:visited, a:active";
+    --headings-font: "Saira Semi Condensed", sans-serif;
+    --shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+        margin-top: 0px;
+    
+        padding-top:2em;
+
+        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    }
+
+    * { color:#000000; text-decoration: none;}
+    
     .pro-img-box {
         display: flex;
         justify-content: center;
@@ -170,6 +196,7 @@
 </head>
 
 <body>
+    
     <div class="container bootdey">
         <div class="col-md-12">
             <div class="hello">
@@ -178,14 +205,17 @@
             <section class="panel">
                 <div class="panel-body">
                     <input type="text" placeholder="Keyword Search" class="form-control" />
-                    <a href="/club/"><i class="fas fa-home"></i></a>
-                    <button class="btn bootstrap-shopping-carts btn-block" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
+                    <a href="/home/"><i class="fas fa-home"></i></a>
+                    <button class="btn bootstrap-shopping-carts" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
+                    <button class="btn bootstrap-shopping-carts" onclick="return_to_club()">Clubs</button>
+                    <button class="btn bootstrap-shopping-carts" onclick="return_to_home_first()">Logout</button>
                 </div>
             </section>
             <div class="row product-list" id="product-list-container">
                 <!-- Product cards will be dynamically added here using JavaScript -->
             </div>
         </div>
+
 
         <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
         <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -304,7 +334,14 @@
                 // Append the JSON string as a query parameter to the URL
                 window.location.href = `/cart/?data=${cartData}`;
             }
-    
+
+            function return_to_club() {
+                window.location.href = `/club/`;
+            }
+            
+            function return_to_home_first() {
+                window.location.href = `/`;
+            }
             // function decrementQuantity(button, index) {
             //     const input = button.parentNode.querySelector('input[type=number]');
             //     if (input.value > 0) {
@@ -386,8 +423,6 @@
                  };
 
         </script>
-        <script>
-            
-         </script>
+        
     </body>
 </html>
