@@ -13,19 +13,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   <title>Shopping Cart</title>
-  <style>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+   <style>
+    .panel-body {
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+   }
+
+    .panel-body a {
+       color: black; /* Set the color to black */
+       font-size: 1.5rem; /* Adjust the font size */
+       text-decoration: none; /* Remove the underline */
+   }
+
+   /* Additional styles for responsiveness */
+   @media (max-width: 768px) {
      .panel-body {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+       flex-direction: column;
+       align-items: flex-start;
+     }
 
      .panel-body a {
-        color: black; /* Set the color to black */
-        font-size: 30px; /* Increase the font size */
-        text-decoration: none; /* Remove the underline */
-    }
-  </style>
+       margin-top: 10px; /* Adjust the spacing */
+     }
+   }
+ </style>
 </head>
 
 <!-- ... (your HTML head) ... -->
@@ -33,39 +47,45 @@
 <!-- ... (your HTML head) ... -->
 
 <body>
+  <div id="nav-container"></div>
+  <div>
+  <section class="h-100" style="background-color: #eee;">
+    
+    <div class="container h-100 py-5">
+      
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-10">
+       
+          <div class="d-flex justify-content-between align-items-center mb-2">
 
-    <section class="h-100" style="background-color: #eee;">
-      <div class="container h-100 py-5">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-          <div class="col-10">
-  
-            <div class="d-flex justify-content-between align-items-center mb-2">
-
-              <h3 class="fw-normal mb-0 text-black">Borrow Inventory List</h3>
-              <div class="panel-body">
-                <a href="/club/"><i class="fas fa-home"></i></a>
+            <h3 class="fw-normal mb-0 text-black">Borrow Inventory List</h3>
+            <div class="panel-body">
+              <a href="/club/"><i class="fas fa-home"></i></a>
               <button type="button" class="btn btn-warning btn-lg" style="margin-left: 30px" onclick="borrowItem()">Borrow Inventory</button>
-              </div>
             </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <h5 class="font-awesome mb-2 text-black">Confirm the selected inventories</h5>
-  
-                <!-- <button type="button" class="btn btn-warning btn-lg" style="margin-left: 30px">Borrow Inventory</button> -->
-              </div>
-
-  
-            <div class="card-container" id="card-container">
-              <!-- Cards will be dynamically added here using JavaScript -->
-            </div>
-  
           </div>
+          
+          <div class="d-flex justify-content-between align-items-center mb-4">
+
+              <h5 class="font-awesome mb-2 text-black">Confirm the selected inventories</h5>
+          </div>
+
+          <div class="card-container" id="card-container">
+            <!-- Cards will be dynamically added here using JavaScript -->
+          </div>
+
         </div>
       </div>
-    </section>
+    </div>
+  </section>
+</div>
   
     <script>
+
+      $(document).ready(function () {
+        $("#nav-container").load("/static/navbar.html");
+      });
+      
       window.onload = function () {
         // Function to get query parameters from the URL
         function getQueryParams() {
@@ -156,7 +176,9 @@
 
         if (response.ok) {
           // The request was successful
+          
           alert('Items borrowed successfully!');
+          window.location.href = "/thank/";
           // You can redirect or perform any other action here
         } else {
           // The request failed
@@ -191,6 +213,11 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"></script>
+      <!-- <script>
+        $(function () {
+            $("#nav-container").load("/static/navbar.html");
+        });
+    </script> -->
   
   </body>
   

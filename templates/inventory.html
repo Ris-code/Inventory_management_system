@@ -1,77 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <title>Shop product list - Bootdey.com</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
-    <link type="text/css" rel="stylesheet" href="/static/css/inventory.css" />
-</head>
-
-<body>
-    <div class="container bootdey">
-        <div class="col-md-12">
-            <section class="panel">
-                <div class="panel-body">
-                    <input type="text" placeholder="Keyword Search" class="form-control" />
-                    <button class="btn btn-primary btn-block"> <i class="fa fa-shopping-cart"> Cart</i></button>
-                </div>
-            </section>
-            <div class="row product-list" id="product-list-container">
-           
-            </div>
-        </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
- 
-    <script>
-        console.log('{{.}}');
-
-        const backendData = JSON.parse('{{.}}');
-
-        
-        const clubInfo = backendData.Club;
-        const items = backendData.Items;
-        const quantities = backendData.Quantity;
-
-        console.log(clubInfo);
-        console.log(items);
-        console.log(quantities);
-
-
-        function createProductCard(item, quantity) {
-            const cardContainer = document.getElementById("product-list-container");
-
-            const card = document.createElement("div");
-            card.className = "col-md-4";
-            card.innerHTML = `
-                <section class="panel">
-                    <div class="pro-img-box">
-                        <span>
-                            <h3 class="pro-title">${item}</h3>
-                            <p class="pro-quantity">Quantity: ${quantity}</p>
-                        </span>
-                        <a href="#" class="adtocart">
-                            <i class="fa fa-shopping-cart"></i>
-                        </a>
-                    </div>
-                </section>
-            `;
-
-            cardContainer.appendChild(card);
-        }
-
-        for (let i = 0; i < items.length; i++) {
-            createProductCard(items[i], quantities[i]);
-        }
-
-    </script>
-</body>
-
-</html> -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -85,118 +11,113 @@
     <link type="text/css" rel="stylesheet" href="/static/css/inventory.css" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        $(function(){
-        $("#nav-container").load("/static/navbar.html");
-      });
+        $(function () {
+            $("#nav-container").load("/static/navbar.html");
+        });
     </script>
-<style>
-    :root {
-    --color-primary: #f857a8;
-    --color-secondary: #ff5858;
-    --color-neutral-lt: black;
-    --color-neutral-med: #e8a9a9;
-    --color-neutral-dk: #e78383;
-    --a-tags: "a, a:active, a:hover, a:visited";
-    --a-tags-no-hov: "a:link, a:visited, a:active";
-    --headings-font: "Saira Semi Condensed", sans-serif;
-    --shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
-    }
+    <style>
+        :root {
+            --color-primary: #f857a8;
+            --color-secondary: #ff5858;
+            --color-neutral-lt: black;
+            --color-neutral-med: #e8a9a9;
+            --color-neutral-dk: #e78383;
+        }
 
-    body {
-        margin-top: 0px;
-    
-        padding-top:2em;
+        body {
+            margin-top: 0;
+            padding-top: 5em; /* Adjusted padding */
+            background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+            color: #000000;
+        }
 
-        background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
-    }
+        .bootdey {
+            margin-top: 2em;
+        }
 
-    * { color:#000000; text-decoration: none;}
-    
-    .pro-img-box {
-        display: flex;
-        justify-content: center;
-        padding: 5px;
-        align-items: center;
-        gap: 10px;
-        text-align: center; 
-    }
+        .pro-img-box {
+            display: flex;
+            justify-content: center;
+            padding: 5px;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+        }
 
-    .pro-img-box .item-name span {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin-bottom: 10px;
-    }
+        .pro-img-box .item-name span {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
 
-    .pro-img-box div {
-        flex: 1;
-    }
+        .pro-img-box div {
+            flex: 1;
+        }
 
-    .pro-img-box button {
-        background-color: #FFC107;
-        color: black;
-        gap: 5px;
-        display: flex;
-        /* flex-direction: column; */
-    }
+        .pro-img-box button {
+            background-color: #FFC107;
+            color: black;
+            gap: 5px;
+            display: flex;
+        }
 
-    .pro-img-box input {
-        width: 100%; /* Adjust the width as needed */
-    }
+        .pro-img-box input {
+            width: 100%;
+        }
 
-    .pro-title {
-        color: #5A5A5A;
-        font-size: 20px;
-    }
+        .pro-title {
+            color: #5A5A5A;
+            font-size: 20px;
+        }
 
-    .add-to-cart-btn {
-        align-items: center;
-        margin-bottom: 5px;
-    }
+        .add-to-cart-btn {
+            align-items: center;
+            margin-bottom: 5px;
+        }
 
-    .panel-body button{
-        background-color: #FFC107;
-        color: black;
-        font-size: large;
-    }
+        .panel-body button {
+            background-color: #FFC107;
+            color: black;
+            font-size: medium;
+        }
 
-    .panel-body {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+        .panel-body {
+            display: flex;
+            /* flex-wrap: wrap; */
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .panel-body a {
-        color: black; /* Set the color to black */
-        font-size: 24px; /* Increase the font size */
-        text-decoration: none; /* Remove the underline */
-    }
+        .panel-body a {
+            color: black;
+            font-size: 24px;
+            text-decoration: none;
+        }
 
-    .hello {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 20px;
-        margin-top: 0px;
-        padding-top: 0px;
-    }
+        .hello {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            margin-top: 100px; /* Adjusted margin-top */
+            padding-top: 0px;
+        }
 
-    .hello a {
-        color: black; /* Set the color to black */
-        font-size: 24px; /* Increase the font size */
-        font-weight: bold;
-        font-style: italic;
-        text-decoration: none; /* Remove the underline */
-    }
-
-</style>
-
-<!-- ... (your HTML head) ... -->
-<!-- ... (your HTML head) ... -->
+        .hello a {
+            color: rgb(255, 255, 255);
+            font-size: 24px;
+            font-weight: bold;
+            font-style: italic;
+            text-decoration: none;
+        }
+    </style>
 </head>
 
 <body>
-    
+    <div id="nav-container"></div>
+   
     <div class="container bootdey">
         <div class="col-md-12">
             <div class="hello">
@@ -205,42 +126,39 @@
             <section class="panel">
                 <div class="panel-body">
                     <input type="text" placeholder="Keyword Search" class="form-control" />
-                    <a href="/home/"><i class="fas fa-home"></i></a>
-                    <button class="btn bootstrap-shopping-carts" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
-                    <button class="btn bootstrap-shopping-carts" onclick="return_to_club()">Clubs</button>
-                    <button class="btn bootstrap-shopping-carts" onclick="return_to_home_first()">Logout</button>
+                    <button class="btn" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
                 </div>
             </section>
             <div class="row product-list" id="product-list-container">
                 <!-- Product cards will be dynamically added here using JavaScript -->
             </div>
         </div>
+    </div>
 
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        console.log('{{.}}');
 
-        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-        <script>
-            console.log('{{.}}');
+        const backendData = JSON.parse('{{.}}');
 
-            const backendData = JSON.parse('{{.}}');
+        // Access the properties as needed
+        const clubInfo = backendData.Club;
+        const items = backendData.Items;
+        const quantities = backendData.Quantity;
+        const item_id = backendData.Item_id;
 
-            // Access the properties as needed
-            const clubInfo = backendData.Club;
-            const items = backendData.Items;
-            const quantities = backendData.Quantity;
-            const item_id = backendData.Item_id;
+        console.log(clubInfo);
+        console.log(items);
+        console.log(quantities);
 
-            console.log(clubInfo);
-            console.log(items);
-            console.log(quantities);
+        // Function to create a product card
+        function createProductCard(item, quantity, item_id) {
+            const cardContainer = document.getElementById("product-list-container");
 
-            // Function to create a product card
-            function createProductCard(item, quantity, item_id) {
-                const cardContainer = document.getElementById("product-list-container");
-
-                const card = document.createElement("div");
-                card.className = "col-md-4";
-                card.innerHTML = `
+            const card = document.createElement("div");
+            card.className = "col-xs-12 col-sm-6 col-md-4"; // Adjusted column sizes
+            card.innerHTML = `
                     <section class="panel">
                         <div class="pro-img-box">
                             <div class="item-name">
@@ -265,19 +183,19 @@
                     </section>
                 `;
 
-                cardContainer.appendChild(card);
-            }
+            cardContainer.appendChild(card);
+        }
 
-            // Create product cards using data from the backend
-            for (let i = 0; i < items.length; i++) {
-                createProductCard(items[i], quantities[i], item_id[i]);
-            }
+        // Create product cards using data from the backend
+        for (let i = 0; i < items.length; i++) {
+            createProductCard(items[i], quantities[i], item_id[i]);
+        }
 
-            // Shopping cart array to store selected items
-            const shoppingCart = [];
+        // Shopping cart array to store selected items
+        const shoppingCart = [];
 
-            // Add click event listener to dynamically created buttons
-            document.addEventListener('click', function (event) {
+        // Add click event listener to dynamically created buttons
+        document.addEventListener('click', function (event) {
             if (event.target.classList.contains('add-to-cart-btn')) {
                 const item = event.target.getAttribute('data-item');
                 const quantityInput = event.target.closest('.pro-img-box').querySelector('.quantity-input');
@@ -298,19 +216,19 @@
                 const item = event.target.getAttribute('data-item');
                 const quantityInput = event.target.closest('.pro-img-box').querySelector('.quantity-input');
                 const item_id = event.target.getAttribute('data-item-id');
-                
+
                 const selectedItem = {
                     item_id: item_id,
                     item: item,
                     quantity: parseInt(quantityInput.value),
                 };
-                
+
                 // Remove the item from the shoppingCart array
                 const index = shoppingCart.findIndex(item => item.item === selectedItem.item);
                 if (index !== -1) {
                     shoppingCart.splice(index, 1);
                 }
-                
+
                 // Enable the corresponding 'add-to-cart-btn'
                 const addButton = document.querySelector(`.add-to-cart-btn[data-item="${selectedItem.item}"]`);
                 if (addButton) {
@@ -322,107 +240,97 @@
             }
         });
 
-            // Log the shopping cart array
-            function logShoppingCart() {
-                console.log('Shopping Cart:', shoppingCart);
+        // Log the shopping cart array
+        function logShoppingCart() {
+            console.log('Shopping Cart:', shoppingCart);
+        }
+
+        function cart() {
+            const cartData = JSON.stringify(shoppingCart);
+            console.log(cartData);
+
+            // Append the JSON string as a query parameter to the URL
+            window.location.href = `/cart/?data=${cartData}`;
+        }
+
+        function return_to_club() {
+            window.location.href = `/club/`;
+        }
+
+        function return_to_home_first() {
+            window.location.href = `/`;
+        }
+
+        // Initialize the typewrite effect
+        var TxtType = function (el, toRotate, period) {
+            this.toRotate = toRotate;
+            this.el = el;
+            this.loopNum = 0;
+            this.period = parseInt(period, 10) || 2000;
+            this.txt = '';
+            this.tick();
+            this.isDeleting = false;
+        };
+
+        TxtType.prototype.tick = function () {
+            var i = this.loopNum % this.toRotate.length;
+            var fullTxt = this.toRotate[i];
+
+            if (this.isDeleting) {
+                this.txt = fullTxt.substring(0, this.txt.length - 1);
+            } else {
+                this.txt = fullTxt.substring(0, this.txt.length + 1);
             }
 
-            function cart() {
-                const cartData = JSON.stringify(shoppingCart);
-                console.log(cartData);
-                
-                // Append the JSON string as a query parameter to the URL
-                window.location.href = `/cart/?data=${cartData}`;
+            this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
+
+            var that = this;
+            var delta = 200 - Math.random() * 100;
+
+            if (this.isDeleting) {
+                delta /= 2;
             }
 
-            function return_to_club() {
-                window.location.href = `/club/`;
+            if (!this.isDeleting && this.txt === fullTxt) {
+                delta = this.period;
+                this.isDeleting = true;
+            } else if (this.isDeleting && this.txt === '') {
+                this.isDeleting = false;
+                this.loopNum++;
+                delta = 500;
             }
-            
-            function return_to_home_first() {
-                window.location.href = `/`;
-            }
-            // function decrementQuantity(button, index) {
-            //     const input = button.parentNode.querySelector('input[type=number]');
-            //     if (input.value > 0) {
-            //     input.stepDown();
-            //     }
-            // }
-  
-            // // Function to increment quantity
-            // function incrementQuantity(button, index, maxQuantity) {
-            //     const input = button.parentNode.querySelector('input[type=number]');
-            //     if (input.value < maxQuantity) {
-            //     input.stepUp();
-            //     }
-            // }
-            var TxtType = function (el, toRotate, period) {
-                     this.toRotate = toRotate;
-                     this.el = el;
-                     this.loopNum = 0;
-                     this.period = parseInt(period, 10) || 2000;
-                     this.txt = '';
-                     this.tick();
-                     this.isDeleting = false;
-                 };
-         
-                 TxtType.prototype.tick = function () {
-                     var i = this.loopNum % this.toRotate.length;
-                     var fullTxt = this.toRotate[i];
-         
-                     if (this.isDeleting) {
-                         this.txt = fullTxt.substring(0, this.txt.length - 1);
-                     } else {
-                         this.txt = fullTxt.substring(0, this.txt.length + 1);
-                     }
-         
-                     this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
-         
-                     var that = this;
-                     var delta = 200 - Math.random() * 100;
-         
-                     if (this.isDeleting) { delta /= 2; }
-         
-                     if (!this.isDeleting && this.txt === fullTxt) {
-                         delta = this.period;
-                         this.isDeleting = true;
-                     } else if (this.isDeleting && this.txt === '') {
-                         this.isDeleting = false;
-                         this.loopNum++;
-                         delta = 500;
-                     }
-         
-                     setTimeout(function () {
-                         that.tick();
-                     }, delta);
-                 };
-         
-                 window.onload = function () {
-                     const clubInfo = backendData.Club;
-                     console.log(clubInfo)
-         
-                     // Dynamically set the data-type attribute
-                     const typewriteElement = document.querySelector('.typewrite');
-                     typewriteElement.setAttribute('data-type', `["Hey, Welcome to ${clubInfo}", "Add the inventory you want to borrow", "Move to borrow cart to checkout the borrow list", "Thank you for visiting ${clubInfo}"]`);
-         
-                     // Initialize the typewrite effect
-                     var elements = document.getElementsByClassName('typewrite');
-                     for (var i = 0; i < elements.length; i++) {
-                         var toRotate = elements[i].getAttribute('data-type');
-                         var period = elements[i].getAttribute('data-period');
-                         if (toRotate) {
-                             new TxtType(elements[i], JSON.parse(toRotate), period);
-                         }
-                     }
-         
-                     // INJECT CSS
-                     var css = document.createElement("style");
-                     css.type = "text/css";
-                     css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
-                     document.body.appendChild(css);
-                 };
 
-        </script>
-        
-    </body>
+            setTimeout(function () {
+                that.tick();
+            }, delta);
+        };
+
+        window.onload = function () {
+            const clubInfo = backendData.Club;
+            console.log(clubInfo)
+
+            // Dynamically set the data-type attribute
+            const typewriteElement = document.querySelector('.typewrite');
+            typewriteElement.setAttribute('data-type', `["Hey, Welcome to ${clubInfo}", "Add the inventory you want to borrow", "Move to borrow cart to checkout the borrow list", "Thank you for visiting ${clubInfo}"]`);
+
+            // Initialize the typewrite effect
+            var elements = document.getElementsByClassName('typewrite');
+            for (var i = 0; i < elements.length; i++) {
+                var toRotate = elements[i].getAttribute('data-type');
+                var period = elements[i].getAttribute('data-period');
+                if (toRotate) {
+                    new TxtType(elements[i], JSON.parse(toRotate), period);
+                }
+            }
+
+            // INJECT CSS
+            var css = document.createElement("style");
+            css.type = "text/css";
+            css.innerHTML = ".typewrite > .wrap { border-right: 0.08em solid #fff}";
+            document.body.appendChild(css);
+        };
+
+    </script>
+</body>
+
 </html>

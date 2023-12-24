@@ -24,6 +24,7 @@ func main() {
 	r.HandleFunc("/inventory/{ID}/", inventory)
 	r.HandleFunc("/cart/", cart)
 	r.HandleFunc("/update/", update)
+	r.HandleFunc("/thank/", thank_page)
 
 
 	 // Enable CORS

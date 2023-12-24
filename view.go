@@ -444,3 +444,8 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	}
 }
+
+func thank_page(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("templates/thank.html")
+	t.Execute(w, nil)
+}
