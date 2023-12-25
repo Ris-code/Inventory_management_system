@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/gorilla/mux"
 	"encoding/json"
+	"net/smtp"
 )
 
 var db *sql.DB
@@ -20,6 +21,7 @@ var err error
 type item_info struct{
 	Item_id []string
 	Club string
+	Club_id string
 	Items []string
 	Quantity []int
 }
@@ -34,6 +36,7 @@ type club_info struct{
 type Item struct {
 	ItemID   []string `json:"itemID"`
 	Quantity []int    `json:"Quantity"`
+	Club_id string `json:"club_id"`
 }
 
 type user struct {
@@ -189,6 +192,21 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	club_id := updateItem.Club_id
+	email := db.QueryRow("SELECT email FROM clubs WHERE club_id=?", club_id)
+
+	var email_id string
+	if err := email.Scan(&email_id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	for idx, itemID := range updateItem.ItemID {
 		fmt.Println("Item ID:", itemID)
 		fmt.Println("Quantity:", updateItem.Quantity[idx])
@@ -217,6 +235,90 @@ func update(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Item ID:", updateItem.ItemID)
 	fmt.Println("Quantity:", updateItem.Quantity)
 
+    send_email(email_id, club_id)
+
+}
+
+func send_email(email_id string, club_id string) {
+		// Send an email to the club
+
+	// sender data
+	from := os.Getenv("EMAIL")
+	password := os.Getenv("PASSWORD")
+
+	// receiver email address
+	to := []string{
+		email_id, // could be more than one receiver email addresses separated by comma  
+	}
+	// smtp - Simple Mail Transfer Protocol
+	host := "smtp.gmail.com"
+	port := "587"
+
+	// message
+	subject := "Order from Club Inventory Management System"
+	message := "Hello, \n\nYou have received an order from the Club Inventory Management System. Please check the website for more details.\n\nThank you,\nClub Inventory Management System"
+
+	// format smtp server address
+	address := host + ":" + port
+
+	// setup authentication information
+	auth := smtp.PlainAuth("", from, password, host)
+
+	// setup email content
+	content := "From: " + from + "\n" +
+		"To: " + email_id + "\n" +
+		"Subject: " + subject + "\n\n" +
+		message
+
+	// connect to smtp server
+	// func Dial(addr string) (*Client, error)
+	// Dial returns a new Client connected to an SMTP server at addr.
+	conn, err := smtp.Dial(address)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// step 1: Use Auth
+	if err = conn.Auth(auth); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// step 2: add all from and to
+	if err = conn.Mail(from); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for _, email_id := range to {
+		if err = conn.Rcpt(email_id); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+	// Data
+	wr, err := conn.Data()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = wr.Write([]byte(content))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// send to all to
+	err = conn.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Email sent successfully")
 }
 
 func inventory(w http.ResponseWriter, r *http.Request){
@@ -281,6 +383,7 @@ func inventory(w http.ResponseWriter, r *http.Request){
 	temp := item_info{
 		Item_id: join_arr_id,
 		Club: club,
+		Club_id: id,
 		Items: join_arr,
 		Quantity: join_arr_quantity,
 	}

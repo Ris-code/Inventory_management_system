@@ -176,6 +176,11 @@
         console.log(shoppingCart);
 
         const returnDate = document.getElementById('borrowDate').value;
+        const club =  sessionStorage.getItem('club');
+        console.log(club);
+
+        const club_id = sessionStorage.getItem('club_id');
+        console.log(club_id);
 
         // Check if the return date is entered
         if (!returnDate) {
@@ -199,7 +204,8 @@
         console.log(quantity);
         const data = {
             itemID: itemID,
-            Quantity: quantity
+            Quantity: quantity,
+            club_id : club_id,
         }
         console.log(data);
                     // Send a POST request to the server

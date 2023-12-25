@@ -141,9 +141,12 @@
         console.log('{{.}}');
 
         const backendData = JSON.parse('{{.}}');
+        sessionStorage.setItem('club', backendData.Club);
+        sessionStorage.setItem('club_id', backendData.Club_id);
 
         // Access the properties as needed
         const clubInfo = backendData.Club;
+        const club_id = backendData.Club_id;
         const items = backendData.Items;
         const quantities = backendData.Quantity;
         const item_id = backendData.Item_id;
