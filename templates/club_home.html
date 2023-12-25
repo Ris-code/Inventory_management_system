@@ -92,7 +92,25 @@
             }
         }
 
-      </style>
+        @media only screen and (max-width: 300px) {
+            .modal-content {
+            width: 100%;
+            }
+        }
+
+        /* Styles for the second modal */
+
+        #myModal-1 {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+    </style>
 
     <!-- Bootstrap core CSS -->
     <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -184,8 +202,8 @@ https://templatemo.com/tm-570-chain-app-dev
                     <a href="#">Add Inventory<i class="fa fa-sign-in-alt"></i></a>
                   </div>
 
-                  <div class="white-button fourth-button scroll-to-section">
-                    <a href="/club/">Change Profile<i class="fa fa-sign-in-alt"></i></a>
+                  <div class="white-button fourth-button scroll-to-section" onclick="openModal_1()">
+                    <a href="#">Change Profile<i class="fa fa-sign-in-alt"></i></a>
                   </div>
                 </div>
               </div>
@@ -219,6 +237,24 @@ https://templatemo.com/tm-570-chain-app-dev
     </div>
   </div>
 
+
+  <div id="myModal-1" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal_1()">&times;</span>
+      <h2>Change Profile Info</h2>
+      <p>Enter only the field you want to change</p>
+      <!-- Add your form fields here -->
+      <form id="inventoryForm">
+        <label for="desp">Club Description</label>
+        <input type="text" id="desp" name="desp"><br>
+        <label for="pic">Club Profile Pic</label>
+        <input type="text" id="pic" name="pic" placeholder="Enter pic's http url"><br>
+        <label for="email">Club Email-Id</label>
+        <input type="text" id="email" name="email"><br>
+        <button type="button" onclick="updateinfo()">Update</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="/static/vendor/jquery/jquery.min.js"></script>
@@ -282,6 +318,51 @@ https://templatemo.com/tm-570-chain-app-dev
     console.log('Item Name:', itemName);
     console.log('Quantity:', quantity);
   }
+
+  function openModal_1() {
+    $('#myModal-1').css('display', 'block');
+  }
+
+    function closeModal_1() {
+        $('#myModal-1').css('display', 'none');
+    }
+
+    function updateinfo() {
+        var desp = $('#desp').val();
+        var pic = $('#pic').val();
+        var email = $('#email').val();
+
+        // Perform any additional validation if needed
+
+        closeModal_1();
+
+        $.ajax({
+            url: '/updateinfo/',
+            type: 'POST',
+            data: {
+                'desp': desp,
+                'pic': pic,
+                'email': email,
+                'name': name
+            },
+            dataType: 'json',
+            success: function (data) {
+                // Do something on success
+                console.log(data);
+
+                if (data['status'] == 'success') {
+                    alert('Profile updated successfully!');
+                } else {
+                    alert('Profile could not be updated!');
+                }
+            }
+        });
+
+        // For testing purposes, log the values to the console
+        console.log('Description:', desp);
+        console.log('Pic:', pic);
+        console.log('Email:', email);
+    }
 </script>
 
   

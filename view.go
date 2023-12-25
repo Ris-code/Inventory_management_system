@@ -131,7 +131,7 @@ func club_option(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ID:", id_arr)
 	fmt.Println("Club:", club_arr)
 	fmt.Println("Info:", info_arr)
-	fmt.Println("Photo Link:", photolink_arr)
+	// fmt.Println("Photo Link:", photolink_arr)
 
 
 	temp := club_info{
@@ -738,5 +738,94 @@ func add_inventory(w http.ResponseWriter, r *http.Request) {
 		}
 
 		fmt.Println("Record inserted successfully")
+		w.Write([]byte("success"))
+	}
+
+func update_info(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
+
+		r.ParseForm()
+		// logic part of sign up
+		var info = r.FormValue("desp")
+		var pic = r.FormValue("pic")
+		var email = r.FormValue("email")
+		var name = r.FormValue("name")
+
+		fmt.Println("info:", info)
+		fmt.Println("pic:", pic)
+		fmt.Println("email:", email)
+		fmt.Println("name:", name)
+
+		// Get the existing entry present in the database for the given username
+		result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
+
+		// Declare a variable to store the retrieved hashed password
+		var club_id string
+
+		if err := result.Scan(&club_id); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				w.Write([]byte("unsuccessfull"))
+				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			// If the error is of any other type, send a 500 status
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("club_id:", club_id)
+
+
+		if pic != "" {
+			// Insert the new user into the database
+			insert, err := db.Prepare("UPDATE clubs SET Img_link=? WHERE club_id=?")
+			if err != nil {
+				panic(err.Error())
+			}
+
+			defer insert.Close()
+
+			// Execute the prepared statement with form values
+			_, err = insert.Exec(pic, club_id)
+			if err != nil {
+				panic(err.Error())
+			}
+		}
+
+		if info != "" {
+			// Insert the new user into the database
+			insert, err := db.Prepare("UPDATE clubs SET Info=? WHERE club_id=?")
+			if err != nil {
+				panic(err.Error())
+			}
+
+			defer insert.Close()
+
+			// Execute the prepared statement with form values
+			_, err = insert.Exec(info, club_id)
+			if err != nil {
+				panic(err.Error())
+			}
+
+		}
+
+		if email != "" {
+			insert, err := db.Prepare("UPDATE clubs SET email=? WHERE club_id=?")
+			if err != nil {
+				panic(err.Error())
+			}
+
+			defer insert.Close()
+
+			// Execute the prepared statement with form values
+			_, err = insert.Exec(info, club_id)
+			if err != nil {
+				panic(err.Error())
+			}
+
+		}
+
+		// fmt.Println("Record inserted successfully")
 		w.Write([]byte("success"))
 	}

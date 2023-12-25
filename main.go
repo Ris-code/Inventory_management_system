@@ -32,6 +32,7 @@ func main() {
 	r.HandleFunc("/clublogin/", coordinator_login)
 	r.HandleFunc("/clubhome/", club_home)
 	r.HandleFunc("/additem/", add_inventory)
+	r.HandleFunc("/updateinfo/", update_info)
 
 
 	 // Enable CORS
