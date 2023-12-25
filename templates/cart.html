@@ -18,12 +18,14 @@
    <style>
     .panel-body {
        display: flex;
+       position: relative;
        justify-content: space-between;
        align-items: center;
+       margin-top: 100px;
    }
 
-    .panel-body a {
-       color: black; /* Set the color to black */
+    .panel-body a, h3, h2 {
+       color: rgb(0, 0, 0); /* Set the color to black */
        font-size: 1.5rem; /* Adjust the font size */
        text-decoration: none; /* Remove the underline */
    }
@@ -47,27 +49,37 @@
 <!-- ... (your HTML head) ... -->
 
 <body>
-  <div id="nav-container"></div>
-  <div>
-  <section class="h-100" style="background-color: #eee;">
-    
+  
+  
+  <section class="h-100" style="background-color: rgb(237, 214, 214);">
+    <div id="nav-container"></div>
     <div class="container h-100 py-5">
       
       <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-10">
        
           <div class="d-flex justify-content-between align-items-center mb-2">
-
-            <h3 class="fw-normal mb-0 text-black">Borrow Inventory List</h3>
             <div class="panel-body">
-              <a href="/club/"><i class="fas fa-home"></i></a>
-              <button type="button" class="btn btn-warning btn-lg" style="margin-left: 30px" onclick="borrowItem()">Borrow Inventory</button>
+            
+            <h1 class="fw-normal mb-4 text-black">Borrow Inventory List</h1>
             </div>
+        
           </div>
           
-          <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-4" style="gap: 10px;">
+            <!-- <div> -->
+              <!-- <h5 class="font-awesome mb-2 text-black" style="color: rgb(0, 0, 0);">Confirm the selected inventories</h5> -->
+                <!-- <button type="button" class="btn"  onclick="borrowItem()">Borrow</button> -->
+              <!-- <div class="panel-body"> -->
+                <!-- <input type="button" class="btn" value="Back" onclick="window.location.href='/inventory/'"> -->
+                <span>
+                <h5 style="color: black;">Enter return date </h5>
+                <input type="date" id="borrowDate" class="form-control" placeholder="Enter the return date" required>
+                </span>
+                <button type="button" class="btn"  onclick="borrowItem()">Borrow</button>
 
-              <h5 class="font-awesome mb-2 text-black">Confirm the selected inventories</h5>
+              <!-- </div> -->
+            <!-- </div> -->
           </div>
 
           <div class="card-container" id="card-container">
@@ -78,13 +90,24 @@
       </div>
     </div>
   </section>
-</div>
+
   
     <script>
 
-      $(document).ready(function () {
-        $("#nav-container").load("/static/navbar.html");
+    jQuery(document).ready(function($) {
+      $.ajax({
+        url: "/static/navbar.html",
+        type: "GET",
+        dataType: "html",
+        success: function (data) {
+          $("#nav-container").html(data);
+        },
+        error: function () {
+          console.error("Error loading navbar.html");
+        }
       });
+    });
+
       
       window.onload = function () {
         // Function to get query parameters from the URL
@@ -107,9 +130,10 @@
   
         // Display the shopping cart content dynamically
         const cardContainer = document.getElementById('card-container');
+
   
         if (shoppingCart.length === 0) {
-          cardContainer.innerHTML = '<p>Your shopping cart is empty.</p>';
+          cardContainer.innerHTML = '<p style="color: black;">Your shopping cart is empty.</p>';
         } else {
           for (let i = 0; i < shoppingCart.length; i++) {
             const cartItem = shoppingCart[i];
@@ -119,10 +143,10 @@
                   <div class="card-body p-4">
                       <div class="row d-flex justify-content-between align-items-center">
                           <div class="col-md-3 col-lg-3 col-xl-3">
-                              <p class="lead fw-normal mb-2">${cartItem.item}</p>
+                              <p class="lead fw-normal mb-2 text-black">${cartItem.item}</p>
                           </div>
                           <div class="col-md-3 col-lg-3 col-xl-3">
-                              <p class="lead fw-normal mb-2" id="quantity-${i}">Quantity: ${cartItem.quantity}</p>
+                              <p class="lead fw-normal mb-2 text-black" id="quantity-${i}">Quantity: ${cartItem.quantity}</p>
                           </div>
                       </div>
                   </div>
@@ -150,6 +174,19 @@
         const cartData = queryParams.data;
         const shoppingCart = JSON.parse(cartData);
         console.log(shoppingCart);
+
+        const returnDate = document.getElementById('borrowDate').value;
+
+        // Check if the return date is entered
+        if (!returnDate) {
+          alert('Please enter the return date.');
+          return;
+        }
+
+        if(shoppingCart.length === 0){
+          alert('Your cart is empty, please add items to the cart.');
+          return;
+        }
         
         const itemID = []
         const quantity = []
