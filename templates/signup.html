@@ -42,6 +42,11 @@
                     <input type="text" class="form-control" id="name" name="name">
 
                 </div>
+                <div class="form-group first-1">
+                  <label for="id">Institute Id</label>
+                  <input type="text" class="form-control" id="id" name="id">
+
+              </div>
               <div class="form-group first">
                 <label for="username">Username</label>
                 <input type="text" class="form-control" id="username" name="username">
@@ -103,12 +108,14 @@
       var username = document.getElementById("username").value;
       var password = document.getElementById("password").value;
       var confirmpassword = document.getElementById("confirmpassword").value;
+      var id = document.getElementById("id").value;
 
       var data = {
         "name": name,
         "username": username,
         "password": password,
-        "confirm-password": confirmpassword
+        "confirm-password": confirmpassword,
+        "id": id
       };
       $.ajax({
         type: "POST",
@@ -120,6 +127,7 @@
           if(data==="success"){
             sessionStorage.setItem("username", username);
             sessionStorage.setItem("name", name);
+            sessionStorage.setItem("id", id);
             window.location.href = "/home/";
           }
           else if(data==="password"){

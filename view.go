@@ -42,6 +42,7 @@ type Item struct {
 	Club string `json:"club"`
 	Return string `json:"returnDate"`
 	Name string `json:"name"`
+	ID string `json:"id"`
 }
 
 type user struct {
@@ -169,6 +170,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	club := updateItem.Club
 	name := updateItem.Name
 	return_date := updateItem.Return
+	id := updateItem.ID
 	email := db.QueryRow("SELECT email FROM clubs WHERE club_id=?", club_id)
 
 	var email_id string
@@ -237,7 +239,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 	
 	fmt.Println("email_item_arr:", email_item_arr)
 
-    send_email(email_id, club_id, name, return_date, club, email_item_arr)
+    send_email(email_id, club_id, name, return_date, club, id, email_item_arr)
 }
 
 // func readHTMLTemplate(path string) (string, error) {
@@ -248,7 +250,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 // 	return string(file), nil
 // }
 
-func send_email(email_id string, club_id string, name string, return_date string, club string, items []email_Item) {
+func send_email(email_id string, club_id string, name string, return_date string, club string, id string, items []email_Item) {
 		// Send an email to the club
 
 	// sender data
@@ -283,11 +285,13 @@ func send_email(email_id string, club_id string, name string, return_date string
 		Name       string
 		ReturnDate string
 		Club	   string
+		Id         string
 		Items      []email_Item
 	}{
 		Name:       name,
 		ReturnDate: return_date,
 		Club: club,
+		Id:         id,
 		Items:      items,
 	}
 
@@ -474,11 +478,13 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		var password = r.FormValue("password")
 		var confirm_password = r.FormValue("confirm-password")
 		var name = r.FormValue("name")
+		var id = r.FormValue("id")
 
 		fmt.Println("username:", username)
 		fmt.Println("password:", password)
 		fmt.Println("confirm-password:", confirm_password)
 		fmt.Println("name:", name)
+		fmt.Println("id:", id)
 		// Check if username already exists
 		result := db.QueryRow("SELECT username FROM student WHERE username=?", username)
 
@@ -510,7 +516,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		
 
 		// Insert the new user into the database
-		insert, err := db.Prepare("INSERT INTO student (username, name, password) VALUES (?, ?, ?)")
+		insert, err := db.Prepare("INSERT INTO student (username, name, password, Institute_id) VALUES (?, ?, ?, ?)")
 		if err != nil {
 			panic(err.Error())
 		}
@@ -518,7 +524,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		defer insert.Close()
 
 		// Execute the prepared statement with form values
-		_, err = insert.Exec(username, name, hashedPassword)
+		_, err = insert.Exec(username, name, hashedPassword, id)
 		if err != nil {
 			panic(err.Error())
 		}

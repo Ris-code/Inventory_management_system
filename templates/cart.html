@@ -186,6 +186,7 @@
         const returnDate = document.getElementById('borrowDate').value;
         const club =  sessionStorage.getItem('club');
         const name = sessionStorage.getItem('name');
+        const id = sessionStorage.getItem('id');
         console.log(club);
 
         const club_id = sessionStorage.getItem('club_id');
@@ -220,7 +221,8 @@
             club: club,
             club_id : club_id,
             returnDate: returnDate,
-            name: name
+            name: name,
+            id : id
         }
         console.log(data);
                     // Send a POST request to the server
