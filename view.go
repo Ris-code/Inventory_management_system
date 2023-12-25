@@ -1,22 +1,30 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"bytes"
 	"encoding/json"
 	"os"
 
+	"net/smtp"
+	"regexp"
+	"strconv"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
-	"net/smtp"
-	"regexp"
-	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 var db *sql.DB
@@ -66,6 +74,7 @@ func init() {
 
 	// Initialize the database connection
 	initDB()
+	initmongoDB()
 }
 
 func initDB() {
@@ -79,6 +88,26 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func initmongoDB() {
+	// Set client options
+	connection_string := os.Getenv("CONNECTION_STRING")
+	clientOptions := options.Client().ApplyURI(connection_string)
+
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Check the connection
+	err = client.Ping(context.Background(), readpref.Primary())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Connected to MongoDB!")
 }
 
 func home_before_login(w http.ResponseWriter, r *http.Request) {	
