@@ -76,7 +76,12 @@
                 <h5 style="color: black;">Enter return date </h5>
                 <input type="date" id="borrowDate" class="form-control" placeholder="Enter the return date" required>
                 </span>
-                <button type="button" class="btn"  onclick="borrowItem()">Borrow</button>
+                <div>
+                <button type="button" class="btn"  id="borrowButton" onclick="borrowItem()">Borrow</button>
+                <div id="loading" style="display: none;">
+                  <i class="fas fa-spinner fa-spin"></i> Borrowing items...
+                </div>
+                </div>
 
               <!-- </div> -->
             <!-- </div> -->
@@ -169,6 +174,9 @@
           return params;
         }
 
+         // Show loading indicator
+      
+
         try {
         const queryParams = getQueryParams();
         const cartData = queryParams.data;
@@ -193,6 +201,9 @@
           alert('Your cart is empty, please add items to the cart.');
           return;
         }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('borrowButton').disabled = true;
         
         const itemID = []
         const quantity = []
@@ -234,8 +245,11 @@
     }catch (error) {
         console.error('Error:', error);
         alert('An error occurred. Please try again.');
+      }finally {
+        // Hide loading indicator
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('borrowButton').disabled = false;
       }
-  
 }
       // Function to remove item
       function removeItem(name) {
