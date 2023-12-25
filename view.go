@@ -15,6 +15,8 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"net/smtp"
+	"regexp"
+	"strconv"
 )
 
 var db *sql.DB
@@ -629,3 +631,112 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
     }
 }
+
+func club_home(w http.ResponseWriter, r *http.Request) {
+	t, _ := template.ParseFiles("templates/club_home.html")
+	t.Execute(w, nil)
+}
+
+func extractNumericPart(itemID string) (int, error) {
+	// Use regular expression to extract numeric part
+	re := regexp.MustCompile(`(\d+)`)
+	match := re.FindStringSubmatch(itemID)
+
+	if len(match) < 2 {
+		return 0, fmt.Errorf("numeric part not found in item ID: %s", itemID)
+	}
+
+	numericPart, err := strconv.Atoi(match[1])
+	if err != nil {
+		return 0, fmt.Errorf("failed to convert numeric part to integer: %v", err)
+	}
+
+	return numericPart, nil
+}
+
+func add_inventory(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
+
+		r.ParseForm()
+		// logic part of sign up
+		var item = r.FormValue("item")
+		var quantity = r.FormValue("quantity")
+		var name = r.FormValue("name")
+
+		fmt.Println("item:", item)
+		fmt.Println("quantity:", quantity)
+
+		// Get the existing entry present in the database for the given username
+		result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
+
+		// Declare a variable to store the retrieved hashed password
+		var club_id string
+
+		if err := result.Scan(&club_id); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				w.Write([]byte("unsuccessfull"))
+				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			// If the error is of any other type, send a 500 status
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("club_id:", club_id)
+
+
+		id_result :=db.QueryRow("SELECT item_id FROM items ORDER BY item_id DESC LIMIT 1")
+
+		var item_id string
+
+		if err := id_result.Scan(&item_id); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				w.Write([]byte("unsuccessfull"))
+				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			// If the error is of any other type, send a 500 status
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("item_id:", item_id)
+
+		numericPart, err := extractNumericPart(item_id)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		numericPart = numericPart + 1
+
+		stringnumericPart := strconv.Itoa(numericPart)
+
+		// fmt.Println("stringnumericPart:", len(stringnumericPart))
+		if len(stringnumericPart) == 1 {
+			item_id = "IT0" + strconv.Itoa(numericPart)
+		} else {
+			item_id = "IT" + strconv.Itoa(numericPart)
+		}
+
+		// Insert the new user into the database
+		insert, err := db.Prepare("INSERT INTO items (item_id, item, quantity, club_id) VALUES (?, ?, ?, ?)")
+		if err != nil {
+			panic(err.Error())
+		}
+
+		defer insert.Close()
+
+		// Execute the prepared statement with form values
+		_, err = insert.Exec(item_id, item, quantity, club_id)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		fmt.Println("Record inserted successfully")
+		w.Write([]byte("success"))
+	}

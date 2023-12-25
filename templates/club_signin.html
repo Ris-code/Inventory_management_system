@@ -97,8 +97,8 @@
                 console.log(data);
 
                 if (data === "success") {
-                    sessionStorage.setItem("cord_club", club);
-                    window.location.href = "/home/";
+                    sessionStorage.setItem("club_name", club);
+                    window.location.href = "/clubhome/";
                 } else {
                     alert("Enter correct unique ID");
                     location.reload();
