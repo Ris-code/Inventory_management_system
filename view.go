@@ -6,12 +6,14 @@ import (
 	"html/template"
 	"net/http"
 
-	_ "github.com/go-sql-driver/mysql"
-	"golang.org/x/crypto/bcrypt"
-	"os"
-	"github.com/joho/godotenv"
-	"github.com/gorilla/mux"
+	"bytes"
 	"encoding/json"
+	"os"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"net/smtp"
 )
 
@@ -37,10 +39,19 @@ type Item struct {
 	ItemID   []string `json:"itemID"`
 	Quantity []int    `json:"Quantity"`
 	Club_id string `json:"club_id"`
+	Club string `json:"club"`
+	Return string `json:"returnDate"`
+	Name string `json:"name"`
 }
 
 type user struct {
 	Username string 
+}
+
+type email_Item struct {
+	Name     string
+	Quantity int
+	Left int
 }
 
 func init() {
@@ -72,44 +83,6 @@ func home_before_login(w http.ResponseWriter, r *http.Request) {
 }
 
 func home_after_login(w http.ResponseWriter, r *http.Request) {	
-
-	// vars := mux.Vars(r)
-    // username := vars["username"]
-
-	// r.ParseForm()
-
-	// username := r.FormValue("username")
-
-	// fmt.Println("Username:", username)
-
-	// result := db.QueryRow("SELECT name FROM student WHERE username=?", username)
-
-	// var name string
-
-	// if err := result.Scan(&name); err != nil {
-	// 	// If an entry with the username does not exist, send an "Unauthorized"(401) status
-	// 	if err == sql.ErrNoRows {
-	// 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-	// 		return
-	// 	}
-	// 	// If the error is of any other type, send a 500 status
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
-	
-	// temp := user{
-	// 	Username: name,
-	// }
-
-	// // Convert the struct to JSON
-	// jsonData, err := json.Marshal(temp)
-	// if err != nil {
-	// 	// Handle the error
-	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// fmt.Println("Name:", name)
 	t, _ := template.ParseFiles("templates/home_after_login.html")
 	t.Execute(w, nil);
 
@@ -119,7 +92,7 @@ func home_after_login(w http.ResponseWriter, r *http.Request) {
 
 func club_option(w http.ResponseWriter, r *http.Request) {
 
-	join_output, err := db.Query("SELECT * FROM clubs")
+	join_output, err := db.Query("SELECT club_id, club, Info, Img_link FROM clubs")
 
 	// fmt.Println(join_output)
 	if err != nil {
@@ -193,6 +166,9 @@ func update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	club_id := updateItem.Club_id
+	club := updateItem.Club
+	name := updateItem.Name
+	return_date := updateItem.Return
 	email := db.QueryRow("SELECT email FROM clubs WHERE club_id=?", club_id)
 
 	var email_id string
@@ -207,9 +183,23 @@ func update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	email_item_arr := []email_Item{}
+
 	for idx, itemID := range updateItem.ItemID {
 		fmt.Println("Item ID:", itemID)
 		fmt.Println("Quantity:", updateItem.Quantity[idx])
+
+		get_item := db.QueryRow("SELECT item FROM items WHERE item_id=?", itemID)
+
+		var setitem string
+
+		if err := get_item.Scan(&setitem); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
 
 		value := db.QueryRow("SELECT quantity FROM items WHERE item_id=?", itemID)
 		// Update the quantity of the item in the database
@@ -224,6 +214,14 @@ func update(w http.ResponseWriter, r *http.Request) {
 		
 		updated_value:=val-updateItem.Quantity[idx]
 
+
+		temp := email_Item{
+			Name:   setitem,
+			Quantity: updateItem.Quantity[idx],
+			Left: updated_value,
+		}
+		email_item_arr = append(email_item_arr, temp)
+
 		_, err := db.Exec("UPDATE items SET quantity=? WHERE item_id=?", updated_value, itemID)
 
 		if err != nil {
@@ -231,94 +229,76 @@ func update(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+
+		fmt.Println("Item ID:", updateItem.ItemID)
+		fmt.Println("Quantity:", updateItem.Quantity)
 	}
-	fmt.Println("Item ID:", updateItem.ItemID)
-	fmt.Println("Quantity:", updateItem.Quantity)
+	
+	
+	fmt.Println("email_item_arr:", email_item_arr)
 
-    send_email(email_id, club_id)
-
+    send_email(email_id, club_id, name, return_date, club, email_item_arr)
 }
 
-func send_email(email_id string, club_id string) {
+// func readHTMLTemplate(path string) (string, error) {
+// 	file, err := os.ReadFile(path)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return string(file), nil
+// }
+
+func send_email(email_id string, club_id string, name string, return_date string, club string, items []email_Item) {
 		// Send an email to the club
 
 	// sender data
 	from := os.Getenv("EMAIL")
 	password := os.Getenv("PASSWORD")
 
+	fmt.Println("Email:", from)
+	// fmt.Println("Password:", password)
+
 	// receiver email address
 	to := []string{
 		email_id, // could be more than one receiver email addresses separated by comma  
 	}
+
+	fmt.Println("Email ID:", to)
 	// smtp - Simple Mail Transfer Protocol
 	host := "smtp.gmail.com"
 	port := "587"
 
-	// message
-	subject := "Order from Club Inventory Management System"
-	message := "Hello, \n\nYou have received an order from the Club Inventory Management System. Please check the website for more details.\n\nThank you,\nClub Inventory Management System"
-
-	// format smtp server address
-	address := host + ":" + port
-
-	// setup authentication information
+	
 	auth := smtp.PlainAuth("", from, password, host)
 
-	// setup email content
-	content := "From: " + from + "\n" +
-		"To: " + email_id + "\n" +
-		"Subject: " + subject + "\n\n" +
-		message
+	t, _ := template.ParseFiles("templates/email_template.html")
 
-	// connect to smtp server
-	// func Dial(addr string) (*Client, error)
-	// Dial returns a new Client connected to an SMTP server at addr.
-	conn, err := smtp.Dial(address)
+	var body bytes.Buffer
+
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: Item borrowed by student \n%s\n\n", mimeHeaders)))
+
+	// Prepare data for template
+	data := struct {
+		Name       string
+		ReturnDate string
+		Club	   string
+		Items      []email_Item
+	}{
+		Name:       name,
+		ReturnDate: return_date,
+		Club: club,
+		Items:      items,
+	}
+
+	t.Execute(&body, data)
+
+	err := smtp.SendMail(host+":"+port, auth, from, to, body.Bytes())
 	if err != nil {
-		fmt.Println(err)
-		return
+	  fmt.Println(err)
+	  return
 	}
-
-	// step 1: Use Auth
-	if err = conn.Auth(auth); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// step 2: add all from and to
-	if err = conn.Mail(from); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	for _, email_id := range to {
-		if err = conn.Rcpt(email_id); err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-
-	// Data
-	wr, err := conn.Data()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = wr.Write([]byte(content))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// send to all to
-	err = conn.Close()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println("Email sent successfully")
+	fmt.Println("Email Sent!")
 }
 
 func inventory(w http.ResponseWriter, r *http.Request){

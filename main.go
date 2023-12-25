@@ -33,9 +33,7 @@ func main() {
 	origins := handlers.AllowedOrigins([]string{"*"})
 	http.Handle("/", handlers.CORS(headers, methods, origins)(r))
 	// http.Handle("/", r)
-
-
-
+	
 	err := http.ListenAndServe(":8080", nil) // setting listening port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
