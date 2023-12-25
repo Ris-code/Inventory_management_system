@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+
+    <!-- Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <title>Sign Up</title>
+</head>
+<body>
+
+<div class="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 order-md-2">
+                <img src="https://svgshare.com/i/111g.svg" alt="Image" class="img-fluid">
+            </div>
+            <div class="col-md-6 contents">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="mb-4">
+                            <h3>Sign In to your Club</h3>
+                            <p class="mb-4">If you are a coordinator signin into the club</p>
+                        </div>
+                        <form action="" method="post">
+                            <div class="form-group">
+                                <!-- <label>Select your Club/Society:</label><br> -->
+                                <select name="clubList" id="clubList" class="form-control">
+                                    <option value="none" selected disabled hidden>Select a Club/Society</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="id">Unique Club Id</label>
+                                <input type="text" class="form-control" id="id" name="id">
+                            </div>
+                            <!-- <div class="form-group">
+                                <label for="otherOption">Other Option:</label>
+                                <input type="text" class="form-control" id="otherOption" name="otherOption">
+                            </div> -->
+                            <button type="button" class="btn btn-block btn-primary" onclick="data()">Club Sign In</button>
+                            <!-- <span class="d-block text-left my-4 text-muted"> or <a href="/signin/" id="signup-link" style="color: #38D39F;">Club Sign In</a></span> -->
+                        </form>
+                        
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/jquery-3.3.1.min.js"></script>
+<script src="/static/js/popper.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/main.js"></script>
+<script>
+    console.log('{{.}}');
+
+    const backendData = JSON.parse('{{.}}');
+
+    const items = backendData.Items;
+    const clubList = document.getElementById("clubList");
+
+    for (let i = 0; i < items.length; i++) {
+        let option = document.createElement("option");
+        option.text = items[i];
+        option.value = items[i];
+        clubList.add(option);
+    }
+
+    function data() {
+       
+        var id = document.getElementById("id").value;
+        var club = document.getElementById("clubList").value;
+
+        var data = {
+            "club": club,
+            "id": id,
+        };
+        $.ajax({
+            type: "POST",
+            url: "/clublogin/",
+            data: data,
+            success: function (data) {
+                console.log(data);
+
+                if (data === "success") {
+                    sessionStorage.setItem("cord_club", club);
+                    window.location.href = "/home/";
+                } else {
+                    alert("Enter correct unique ID");
+                    location.reload();
+                }
+            }
+        });
+
+    }
+</script>
+</body>
+</html>

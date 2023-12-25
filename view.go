@@ -55,6 +55,7 @@ type email_Item struct {
 	Left int
 }
 
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -537,4 +538,94 @@ func signup(w http.ResponseWriter, r *http.Request) {
 func thank_page(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("templates/thank.html")
 	t.Execute(w, nil)
+}
+
+
+
+// coordinator functions
+
+func coordinator_login(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
+
+	if r.Method == "GET" {
+		result,_ := db.Query("SELECT club_id, club FROM clubs")
+
+		var club []string
+
+		for result.Next() {
+			var id string
+			var name string
+
+			err = result.Scan(&id, &name)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			// temp := coordinator{
+			// 	club_name: name,
+			// 	club_id: id,
+			// }
+
+			club = append(club, name)
+		}
+		data := struct {
+			Items []string
+		}{
+			Items: club,
+		}
+		fmt.Println("Club:", club)
+
+		jsonData, err := json.Marshal(data)
+
+		if err != nil {
+			// Handle the error
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		t, _ := template.ParseFiles("templates/club_signin.html")
+		t.Execute(w, template.JS(jsonData))
+	} else if r.Method == "POST" {
+		r.ParseForm()
+		// logic part of sign up
+		var club = r.FormValue("club")
+		var id = r.FormValue("id")
+
+		fmt.Println("club:", club)
+		fmt.Println("id:", id)
+		// Check if username already exists
+		result := db.QueryRow("SELECT club FROM clubs WHERE unique_id=?", id)
+
+		var existingClub string
+		if err := result.Scan(&existingClub) ; err != nil {
+			fmt.Println("Unique ID does not exist")
+			w.Write([]byte("unique_id"))
+
+			return
+		}
+
+		// if err != nil {
+		// 	// Username already exists
+		// 	fmt.Println("Unique ID does not exist")
+		// 	w.Write([]byte("unique_id"))
+			
+		// 	return
+		// } else if err != sql.ErrNoRows {
+		// 	// If the error is of any other type, send a 500 status
+		// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// 	return
+		// }
+
+		if existingClub != club {
+			// Passwords do not match
+			w.Write([]byte("not_club"))
+			// http.Redirect(w, r, "/signup/", http.StatusSeeOther)
+			return
+		}
+
+		fmt.Println("Entered successfully")
+		w.Write([]byte("success"))
+	} else {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+    }
 }
