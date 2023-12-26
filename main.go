@@ -27,22 +27,27 @@ func main() {
 	r.HandleFunc("/cart/", cart)
 	r.HandleFunc("/update/", update)
 	r.HandleFunc("/thank/", thank_page)
+	r.HandleFunc("/borrowlist/", borrow_list)
+	r.HandleFunc("/deleteItems/", delete_items)
 
 	// club 
 	r.HandleFunc("/clublogin/", coordinator_login)
 	r.HandleFunc("/clubhome/", club_home)
 	r.HandleFunc("/additem/", add_inventory)
 	r.HandleFunc("/updateinfo/", update_info)
+	
 
+	// Enable CORS for all routes
+	corsHandler := handlers.CORS(
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+		handlers.AllowedOrigins([]string{"*"}),
+	)
 
-	 // Enable CORS
-	headers := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
-	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
-	origins := handlers.AllowedOrigins([]string{"*"})
-	http.Handle("/", handlers.CORS(headers, methods, origins)(r))
-	// http.Handle("/", r)
+	// Apply CORS middleware to the router
+	http.Handle("/", corsHandler(r))
 
-	err := http.ListenAndServe(":8080", nil) // setting listening port
+	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

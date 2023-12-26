@@ -29,13 +29,17 @@
                     <h1>Thank You ! </h1>
                     <h2>You have successfully borrowed the items 🙌</h2>
                     <button class="btn btn-primary" onclick="return_to_home()">Back Home</button>
-                    <button class="btn btn-primary" onclick="">Borrow List</button>
+                    <button class="btn btn-primary" onclick="return_borrow_list()">Borrow List</button>
                 </div>
             </div>
 
             <script>
                 function return_to_home() {
                     window.location.href = "/home/";
+                }
+
+                function return_borrow_list() {
+                    window.location.href = "/borrowlist/";
                 }
             </script>
     </body>

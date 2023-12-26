@@ -25,66 +25,85 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+
+	"time"
 )
 
 var db *sql.DB
 var err error
 
-type item_info struct{
-	Item_id []string
-	Club string
-	Club_id string
-	Items []string
+type item_info struct {
+	Item_id  []string
+	Club     string
+	Club_id  string
+	Items    []string
 	Quantity []int
 }
 
-type club_info struct{
+type club_info struct {
 	Club_id []string
-	Club []string
-	Info []string
-	Link []string
+	Club    []string
+	Info    []string
+	Link    []string
 }
 
 type Item struct {
 	ItemID   []string `json:"itemID"`
 	Quantity []int    `json:"Quantity"`
-	Club_id string `json:"club_id"`
-	Club string `json:"club"`
-	Return string `json:"returnDate"`
-	Name string `json:"name"`
-	ID string `json:"id"`
-	Username string `json:"username"`
+	Club_id  string   `json:"club_id"`
+	Club     string   `json:"club"`
+	Return   string   `json:"returnDate"`
+	Name     string   `json:"name"`
+	ID       string   `json:"id"`
+	Username string   `json:"username"`
 }
 
 type user struct {
-	Username string 
+	Username string
+	ID       string
 }
 
 type email_Item struct {
 	Name     string
 	Quantity int
-	Left int
+	Left     int
+}
+type return_email_Item struct {
+	Name       string
+	Quantity   int
+	Left       int
+	ReturnDate string
+	Status     string
 }
 
 // Remove the duplicate declaration of inventory
 type BorrowedItem struct {
-	Name     string `bson:"name"`
-    Quantity int    `bson:"quantity"`
+	Name       string `bson:"name"`
+	Quantity   int    `bson:"quantity"`
 	ReturnDate string `bson:"return_date"`
 }
 
 type Club_present struct {
-	Club_id string `bson:"club_id"`
-	Club string `bson:"club"`
-	Items []BorrowedItem `bson:"items"`
+	Club_id       string         `bson:"club_id"`
+	Club          string         `bson:"club"`
+	Borrow_status string         `bson:"borrow_status"`
+	Items         []BorrowedItem `bson:"items"`
 }
 
 type student struct {
-	Username     string        `bson:"username"`
-    Name         string        `bson:"name"`
-    InstituteID  string        `bson:"institute_id"`
-	Borrow_status string          `bson:"borrow_status"`
-    Club_info       []Club_present `bson:"club_info"`
+	Username    string         `bson:"username"`
+	Name        string         `bson:"name"`
+	InstituteID string         `bson:"institute_id"`
+	Club_info   []Club_present `bson:"club_info"`
+}
+
+type DeleteItemsRequest struct {
+	Item       []string `json:"item"`
+	Quantity   []string `json:"quantity"`
+	ReturnDate []string `json:"returnDate"`
+	Username   string   `json:"username"`
+	Club       string   `json:"club"`
+	ID         string   `json:"id"`
 }
 
 var collection *mongo.Collection
@@ -126,31 +145,25 @@ func initmongoDB() {
 
 	collection = client.Database("Student_inventory_list").Collection("Item_list")
 
-
 	// Check the connection
 	err = client.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	fmt.Println("Connected to MongoDB!")
 }
 
-
-	
-
-func home_before_login(w http.ResponseWriter, r *http.Request) {	
+func home_before_login(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("templates/home_before_login.html")
 	t.Execute(w, nil)
 }
 
-func home_after_login(w http.ResponseWriter, r *http.Request) {	
+func home_after_login(w http.ResponseWriter, r *http.Request) {
 	t, _ := template.ParseFiles("templates/home_after_login.html")
-	t.Execute(w, nil);
+	t.Execute(w, nil)
 
 }
-
-
 
 func club_option(w http.ResponseWriter, r *http.Request) {
 
@@ -158,11 +171,11 @@ func club_option(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println(join_output)
 	if err != nil {
-        // Handle the error (log it or return an error response)
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-        return
-    }
-    defer join_output.Close()
+		// Handle the error (log it or return an error response)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer join_output.Close()
 
 	id_arr := []string{}
 	club_arr := []string{}
@@ -191,12 +204,11 @@ func club_option(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Info:", info_arr)
 	// fmt.Println("Photo Link:", photolink_arr)
 
-
 	temp := club_info{
 		Club_id: id_arr,
-		Club: club_arr,
-		Info: info_arr,
-		Link: photolink_arr,
+		Club:    club_arr,
+		Info:    info_arr,
+		Link:    photolink_arr,
 	}
 
 	// Convert the struct to JSON
@@ -210,7 +222,7 @@ func club_option(w http.ResponseWriter, r *http.Request) {
 	// Render the template with the JSON data
 	t, _ := template.ParseFiles("templates/club1.html")
 	t.Execute(w, template.JS(jsonData))
-	
+
 }
 
 func cart(w http.ResponseWriter, r *http.Request) {
@@ -277,14 +289,13 @@ func update(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		
-		updated_value:=val-updateItem.Quantity[idx]
 
+		updated_value := val - updateItem.Quantity[idx]
 
 		temp := email_Item{
-			Name:   setitem,
+			Name:     setitem,
 			Quantity: updateItem.Quantity[idx],
-			Left: updated_value,
+			Left:     updated_value,
 		}
 		email_item_arr = append(email_item_arr, temp)
 
@@ -301,12 +312,12 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 		update := bson.M{
 			"$set": bson.M{
-				"borrow_status": "Yes",
+				"club_info.$.borrow_status": "Yes",
 			},
 			"$push": bson.M{
 				"club_info.$.items": bson.M{
-					"name":     setitem,
-					"quantity": updateItem.Quantity[idx],
+					"name":        setitem,
+					"quantity":    updateItem.Quantity[idx],
 					"return_date": return_date,
 				},
 			},
@@ -320,11 +331,10 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Printf("Matched %v document and modified %v document.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 	}
-	
-	
+
 	fmt.Println("email_item_arr:", email_item_arr)
 
-    send_email(email_id, club_id, name, return_date, club, id, email_item_arr)
+	send_email(email_id, club_id, name, return_date, club, id, email_item_arr)
 }
 
 // func readHTMLTemplate(path string) (string, error) {
@@ -336,7 +346,7 @@ func update(w http.ResponseWriter, r *http.Request) {
 // }
 
 func send_email(email_id string, club_id string, name string, return_date string, club string, id string, items []email_Item) {
-		// Send an email to the club
+	// Send an email to the club
 
 	// sender data
 	from := os.Getenv("EMAIL")
@@ -347,7 +357,7 @@ func send_email(email_id string, club_id string, name string, return_date string
 
 	// receiver email address
 	to := []string{
-		email_id, // could be more than one receiver email addresses separated by comma  
+		email_id, // could be more than one receiver email addresses separated by comma
 	}
 
 	fmt.Println("Email ID:", to)
@@ -355,7 +365,6 @@ func send_email(email_id string, club_id string, name string, return_date string
 	host := "smtp.gmail.com"
 	port := "587"
 
-	
 	auth := smtp.PlainAuth("", from, password, host)
 
 	t, _ := template.ParseFiles("templates/email_template.html")
@@ -369,13 +378,13 @@ func send_email(email_id string, club_id string, name string, return_date string
 	data := struct {
 		Name       string
 		ReturnDate string
-		Club	   string
+		Club       string
 		Id         string
 		Items      []email_Item
 	}{
 		Name:       name,
 		ReturnDate: return_date,
-		Club: club,
+		Club:       club,
 		Id:         id,
 		Items:      items,
 	}
@@ -384,24 +393,24 @@ func send_email(email_id string, club_id string, name string, return_date string
 
 	err := smtp.SendMail(host+":"+port, auth, from, to, body.Bytes())
 	if err != nil {
-	  fmt.Println(err)
-	  return
+		fmt.Println(err)
+		return
 	}
 	fmt.Println("Email Sent!")
 }
 
-func inventory(w http.ResponseWriter, r *http.Request){
+func inventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method)
 	t, _ := template.ParseFiles("templates/inventory.html")
 
 	vars := mux.Vars(r)
-    id := vars["ID"]
+	id := vars["ID"]
 	fmt.Println("ID:", id)
 
 	result := db.QueryRow("SELECT club FROM clubs WHERE club_id=?", id)
 
 	var club string
-	
+
 	if err := result.Scan(&club); err != nil {
 		// If an entry with the username does not exist, send an "Unauthorized"(401) status
 		if err == sql.ErrNoRows {
@@ -419,11 +428,11 @@ func inventory(w http.ResponseWriter, r *http.Request){
 
 	// fmt.Println(join_output)
 	if err != nil {
-        // Handle the error (log it or return an error response)
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-        return
-    }
-    defer join_output.Close()
+		// Handle the error (log it or return an error response)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer join_output.Close()
 
 	join_arr := []string{}
 	join_arr_id := []string{}
@@ -448,12 +457,11 @@ func inventory(w http.ResponseWriter, r *http.Request){
 	fmt.Println("Items:", join_arr)
 	fmt.Println("Quantity:", join_arr_quantity)
 
-
 	temp := item_info{
-		Item_id: join_arr_id,
-		Club: club,
-		Club_id: id,
-		Items: join_arr,
+		Item_id:  join_arr_id,
+		Club:     club,
+		Club_id:  id,
+		Items:    join_arr,
 		Quantity: join_arr_quantity,
 	}
 
@@ -520,7 +528,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-    
 
 	// Compare the stored hashed password with the hashed version of the password that was received
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginPassword)); err != nil {
@@ -533,8 +540,26 @@ func login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("success")
 	// If we reach this point, that means the user's password was correct, and they are authorized
 	// Send a success response to the client
+
+	institute_id := db.QueryRow("SELECT Institute_id FROM student WHERE username=?", loginUsername)
+
+	var id string
+
+	if err := institute_id.Scan(&id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	temp := user{
 		Username: name,
+		ID:       id,
 	}
 
 	// Convert the struct to JSON
@@ -546,9 +571,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Println("Name:", name)
-	w.Write([]byte(jsonData))	
+	w.Write([]byte(jsonData))
 }
-
 
 func signup(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) // get request method
@@ -580,7 +604,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 			// Username already exists
 			fmt.Println("Username already exists")
 			w.Write([]byte("username"))
-			
+
 			return
 		} else if err != sql.ErrNoRows {
 			// If the error is of any other type, send a 500 status
@@ -597,8 +621,6 @@ func signup(w http.ResponseWriter, r *http.Request) {
 
 		// Hash the password
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), 8)
-
-		
 
 		// Insert the new user into the database
 		insert, err := db.Prepare("INSERT INTO student (username, name, password, Institute_id) VALUES (?, ?, ?, ?)")
@@ -632,14 +654,14 @@ func signup(w http.ResponseWriter, r *http.Request) {
 
 			temp := Club_present{
 				Club_id: club_id,
-				Club: club,
-				Items: []BorrowedItem{},
+				Club:    club,
+				Items:   []BorrowedItem{},
 			}
 
 			club_data = append(club_data, temp)
 		}
 		// Insert a new document into the collection.
-		user := student{ Username: username, Name: name, InstituteID: id, Borrow_status: "No", Club_info: club_data}
+		user := student{Username: username, Name: name, InstituteID: id, Club_info: club_data}
 
 		fmt.Println("user:", user)
 
@@ -668,7 +690,313 @@ func thank_page(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
+func borrow_list(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
 
+	if r.Method == "GET" {
+		result, _ := db.Query("SELECT club_id, club FROM clubs")
+
+		var club []string
+
+		for result.Next() {
+			var id string
+			var name string
+
+			err = result.Scan(&id, &name)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			// temp := coordinator{
+			// 	club_name: name,
+			// 	club_id: id,
+			// }
+
+			club = append(club, name)
+		}
+		data := struct {
+			Items []string
+		}{
+			Items: club,
+		}
+		fmt.Println("Club:", club)
+
+		jsonData, err := json.Marshal(data)
+
+		if err != nil {
+			// Handle the error
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		t, _ := template.ParseFiles("templates/Borrow_list.html")
+		t.Execute(w, template.JS(jsonData))
+	} else if r.Method == "POST" {
+		r.ParseForm()
+
+		var club = r.FormValue("club")
+		var username = r.FormValue("username")
+
+		fmt.Println("club:", club)
+
+		filter := bson.M{"username": username, "club_info.club": club, "club_info.borrow_status": "Yes"}
+
+		var student student
+
+		err := collection.FindOne(context.Background(), filter).Decode(&student)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Student:", student)
+
+		temp := student.Club_info
+
+		fmt.Println("Temp:", temp)
+
+		var items []BorrowedItem
+
+		for _, item := range temp {
+			if item.Club == club {
+				items = item.Items
+			}
+		}
+
+		fmt.Println("Items:", items)
+
+		// Convert the struct to JSON
+		jsonData, err := json.Marshal(items)
+
+		if err != nil {
+			// Handle the error
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		w.Write([]byte(jsonData))
+	}
+}
+
+func delete_items(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
+
+	// r.ParseForm()
+
+	decoder := json.NewDecoder(r.Body)
+	var deleteItemsRequest DeleteItemsRequest
+	err := decoder.Decode(&deleteItemsRequest)
+	if err != nil {
+		http.Error(w, "Error decoding JSON request", http.StatusBadRequest)
+		return
+	}
+
+	item := deleteItemsRequest.Item
+	quantity := deleteItemsRequest.Quantity
+	returnDate := deleteItemsRequest.ReturnDate
+	username := deleteItemsRequest.Username
+	club := deleteItemsRequest.Club
+	id := deleteItemsRequest.ID
+
+	fmt.Println("item:", item)
+	fmt.Println("quantity:", quantity)
+	fmt.Println("returnDate:", returnDate)
+
+	result := db.QueryRow("SELECT email FROM clubs WHERE club=?", club)
+
+	var email_id string
+
+	if err := result.Scan(&email_id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	delete_item_arr := []return_email_Item{}
+
+	for idx, itemID := range item {
+		var delete_item = string(itemID)
+		var delete_quantity_str = quantity[idx]
+		var delete_returnDate = string(returnDate[idx])
+		delete_quantity, _ := strconv.Atoi(delete_quantity_str)
+
+		fmt.Println("Item:", delete_item)
+		fmt.Println("Quantity:", delete_quantity)
+		fmt.Println("Return Date:", delete_returnDate)
+		fmt.Println("Username:", username)
+		fmt.Println("Club:", club)
+
+		filter := bson.M{"username": username, "club_info.club": club, "club_info.items.name": delete_item}
+
+		update := bson.M{
+			"$pull": bson.M{
+				"club_info.$.items": bson.M{
+					"name":        delete_item,
+					"quantity":    delete_quantity,
+					"return_date": delete_returnDate,
+				},
+			},
+		}
+
+		// Execute the $pull operation
+		_, err := collection.UpdateOne(context.TODO(), filter, update)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		filter = bson.M{"username": username}
+
+		// Then, check the length of the items array
+		var result bson.M
+		err = collection.FindOne(context.TODO(), filter).Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Check if "club_info" field exists
+		clubInfo, ok := result["club_info"].(bson.A)
+		if !ok {
+			log.Fatal("Club information not found.")
+		}
+
+		// Find the specific club
+		var targetClub bson.M
+		for _, c := range clubInfo {
+			if c.(bson.M)["club"].(string) == club {
+				targetClub = c.(bson.M)
+				break
+			}
+		}
+
+		// Check if the "items" field exists and is an array (bson.A)
+		item_arr, ok := targetClub["items"].(bson.A)
+
+		fmt.Println("Item Array:", item_arr)
+		fmt.Println("Length:", len(item_arr))
+
+		if len(item_arr) == 0 {
+			// If it's 0, set borrow_status to "No"
+			update = bson.M{
+				"$set": bson.M{
+					"club_info.$.borrow_status": "No",
+				},
+			}
+			_, err = collection.UpdateOne(context.TODO(), filter, update)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		// Update the quantity of the item in the database
+		value := db.QueryRow("SELECT quantity FROM items WHERE item=?", delete_item)
+
+		var val int
+
+		if err := value.Scan(&val); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
+
+		updated_value := val + delete_quantity
+
+		currentTime := time.Now()
+		// Time := currentTime.Format("2006-01-02")
+
+		compareDate, _ := time.Parse("2006-01-02", delete_returnDate)
+
+		var status string
+		if currentTime.After(compareDate) {
+			status = "Late"
+		} else {
+			status = "Within Time"
+		}
+
+		temp := return_email_Item{
+			Name:       delete_item,
+			Quantity:   delete_quantity,
+			Left:       updated_value,
+			ReturnDate: delete_returnDate,
+			Status:     status,
+		}
+
+		delete_item_arr = append(delete_item_arr, temp)
+
+		_, err = db.Exec("UPDATE items SET quantity=? WHERE item=?", updated_value, delete_item)
+
+		if err != nil {
+			// If there is an issue with the database, return a 500 error
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("Item ID:", item)
+		fmt.Println("Quantity:", quantity)
+		fmt.Println("Return Date:", returnDate)
+		fmt.Println("Username:", username)
+		fmt.Println("Club:", club)
+
+	}
+
+	send_return_email(username, club, id, email_id, delete_item_arr)
+}
+
+func send_return_email(username string, club string, id string, email_id string, items []return_email_Item) {
+	// sender data
+	from := os.Getenv("EMAIL")
+	password := os.Getenv("PASSWORD")
+
+	fmt.Println("Email:", from)
+	// fmt.Println("Password:", password)
+
+	// receiver email address
+	to := []string{
+		email_id, // could be more than one receiver email addresses separated by comma
+	}
+
+	fmt.Println("Email ID:", to)
+	// smtp - Simple Mail Transfer Protocol
+	host := "smtp.gmail.com"
+	port := "587"
+
+	auth := smtp.PlainAuth("", from, password, host)
+
+	t, _ := template.ParseFiles("templates/return_email_template.html")
+
+	var body bytes.Buffer
+
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: Item returned by student \n%s\n\n", mimeHeaders)))
+
+	// Prepare data for template
+	data := struct {
+		Name  string
+		Club  string
+		Id    string
+		Items []return_email_Item
+	}{
+		Name:  username,
+		Club:  club,
+		Id:    id,
+		Items: items,
+	}
+
+	t.Execute(&body, data)
+
+	err := smtp.SendMail(host+":"+port, auth, from, to, body.Bytes())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Email Sent!")
+}
 
 // coordinator functions
 
@@ -676,7 +1004,7 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) // get request method
 
 	if r.Method == "GET" {
-		result,_ := db.Query("SELECT club_id, club FROM clubs")
+		result, _ := db.Query("SELECT club_id, club FROM clubs")
 
 		var club []string
 
@@ -725,7 +1053,7 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 		result := db.QueryRow("SELECT club FROM clubs WHERE unique_id=?", id)
 
 		var existingClub string
-		if err := result.Scan(&existingClub) ; err != nil {
+		if err := result.Scan(&existingClub); err != nil {
 			fmt.Println("Unique ID does not exist")
 			w.Write([]byte("unique_id"))
 
@@ -736,7 +1064,7 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 		// 	// Username already exists
 		// 	fmt.Println("Unique ID does not exist")
 		// 	w.Write([]byte("unique_id"))
-			
+
 		// 	return
 		// } else if err != sql.ErrNoRows {
 		// 	// If the error is of any other type, send a 500 status
@@ -755,7 +1083,7 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("success"))
 	} else {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-    }
+	}
 }
 
 func club_home(w http.ResponseWriter, r *http.Request) {
@@ -783,74 +1111,127 @@ func extractNumericPart(itemID string) (int, error) {
 func add_inventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) // get request method
 
-		r.ParseForm()
-		// logic part of sign up
-		var item = r.FormValue("item")
-		var quantity = r.FormValue("quantity")
-		var name = r.FormValue("name")
+	r.ParseForm()
+	// logic part of sign up
+	var item = r.FormValue("item")
+	var quantity = r.FormValue("quantity")
+	var name = r.FormValue("name")
 
-		fmt.Println("item:", item)
-		fmt.Println("quantity:", quantity)
+	fmt.Println("item:", item)
+	fmt.Println("quantity:", quantity)
 
-		// Get the existing entry present in the database for the given username
-		result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
+	// Get the existing entry present in the database for the given username
+	result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
 
-		// Declare a variable to store the retrieved hashed password
-		var club_id string
+	// Declare a variable to store the retrieved hashed password
+	var club_id string
 
-		if err := result.Scan(&club_id); err != nil {
-			// If an entry with the username does not exist, send an "Unauthorized"(401) status
-			if err == sql.ErrNoRows {
-				w.Write([]byte("unsuccessfull"))
-				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-			// If the error is of any other type, send a 500 status
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	if err := result.Scan(&club_id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-		fmt.Println("club_id:", club_id)
+	fmt.Println("club_id:", club_id)
 
+	id_result := db.QueryRow("SELECT item_id FROM items ORDER BY item_id DESC LIMIT 1")
 
-		id_result :=db.QueryRow("SELECT item_id FROM items ORDER BY item_id DESC LIMIT 1")
+	var item_id string
 
-		var item_id string
-
-		if err := id_result.Scan(&item_id); err != nil {
-			// If an entry with the username does not exist, send an "Unauthorized"(401) status
-			if err == sql.ErrNoRows {
-				w.Write([]byte("unsuccessfull"))
-				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-			// If the error is of any other type, send a 500 status
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	if err := id_result.Scan(&item_id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-		fmt.Println("item_id:", item_id)
+	fmt.Println("item_id:", item_id)
 
-		numericPart, err := extractNumericPart(item_id)
+	numericPart, err := extractNumericPart(item_id)
 
-		if err != nil {
-			fmt.Println(err)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	numericPart = numericPart + 1
+
+	stringnumericPart := strconv.Itoa(numericPart)
+
+	// fmt.Println("stringnumericPart:", len(stringnumericPart))
+	if len(stringnumericPart) == 1 {
+		item_id = "IT0" + strconv.Itoa(numericPart)
+	} else {
+		item_id = "IT" + strconv.Itoa(numericPart)
+	}
+
+	// Insert the new user into the database
+	insert, err := db.Prepare("INSERT INTO items (item_id, item, quantity, club_id) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer insert.Close()
+
+	// Execute the prepared statement with form values
+	_, err = insert.Exec(item_id, item, quantity, club_id)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Println("Record inserted successfully")
+	w.Write([]byte("success"))
+}
+
+func update_info(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("method:", r.Method) // get request method
+
+	r.ParseForm()
+	// logic part of sign up
+	var info = r.FormValue("desp")
+	var pic = r.FormValue("pic")
+	var email = r.FormValue("email")
+	var name = r.FormValue("name")
+
+	fmt.Println("info:", info)
+	fmt.Println("pic:", pic)
+	fmt.Println("email:", email)
+	fmt.Println("name:", name)
+
+	// Get the existing entry present in the database for the given username
+	result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
+
+	// Declare a variable to store the retrieved hashed password
+	var club_id string
+
+	if err := result.Scan(&club_id); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+		if err == sql.ErrNoRows {
+			w.Write([]byte("unsuccessfull"))
+			// http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-		numericPart = numericPart + 1
+	fmt.Println("club_id:", club_id)
 
-		stringnumericPart := strconv.Itoa(numericPart)
-
-		// fmt.Println("stringnumericPart:", len(stringnumericPart))
-		if len(stringnumericPart) == 1 {
-			item_id = "IT0" + strconv.Itoa(numericPart)
-		} else {
-			item_id = "IT" + strconv.Itoa(numericPart)
-		}
-
+	if pic != "" {
 		// Insert the new user into the database
-		insert, err := db.Prepare("INSERT INTO items (item_id, item, quantity, club_id) VALUES (?, ?, ?, ?)")
+		insert, err := db.Prepare("UPDATE clubs SET Img_link=? WHERE club_id=?")
 		if err != nil {
 			panic(err.Error())
 		}
@@ -858,100 +1239,45 @@ func add_inventory(w http.ResponseWriter, r *http.Request) {
 		defer insert.Close()
 
 		// Execute the prepared statement with form values
-		_, err = insert.Exec(item_id, item, quantity, club_id)
+		_, err = insert.Exec(pic, club_id)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	if info != "" {
+		// Insert the new user into the database
+		insert, err := db.Prepare("UPDATE clubs SET Info=? WHERE club_id=?")
 		if err != nil {
 			panic(err.Error())
 		}
 
-		fmt.Println("Record inserted successfully")
-		w.Write([]byte("success"))
+		defer insert.Close()
+
+		// Execute the prepared statement with form values
+		_, err = insert.Exec(info, club_id)
+		if err != nil {
+			panic(err.Error())
+		}
+
 	}
 
-func update_info(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) // get request method
-
-		r.ParseForm()
-		// logic part of sign up
-		var info = r.FormValue("desp")
-		var pic = r.FormValue("pic")
-		var email = r.FormValue("email")
-		var name = r.FormValue("name")
-
-		fmt.Println("info:", info)
-		fmt.Println("pic:", pic)
-		fmt.Println("email:", email)
-		fmt.Println("name:", name)
-
-		// Get the existing entry present in the database for the given username
-		result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
-
-		// Declare a variable to store the retrieved hashed password
-		var club_id string
-
-		if err := result.Scan(&club_id); err != nil {
-			// If an entry with the username does not exist, send an "Unauthorized"(401) status
-			if err == sql.ErrNoRows {
-				w.Write([]byte("unsuccessfull"))
-				// http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
-			// If the error is of any other type, send a 500 status
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
+	if email != "" {
+		insert, err := db.Prepare("UPDATE clubs SET email=? WHERE club_id=?")
+		if err != nil {
+			panic(err.Error())
 		}
 
-		fmt.Println("club_id:", club_id)
+		defer insert.Close()
 
-
-		if pic != "" {
-			// Insert the new user into the database
-			insert, err := db.Prepare("UPDATE clubs SET Img_link=? WHERE club_id=?")
-			if err != nil {
-				panic(err.Error())
-			}
-
-			defer insert.Close()
-
-			// Execute the prepared statement with form values
-			_, err = insert.Exec(pic, club_id)
-			if err != nil {
-				panic(err.Error())
-			}
+		// Execute the prepared statement with form values
+		_, err = insert.Exec(info, club_id)
+		if err != nil {
+			panic(err.Error())
 		}
 
-		if info != "" {
-			// Insert the new user into the database
-			insert, err := db.Prepare("UPDATE clubs SET Info=? WHERE club_id=?")
-			if err != nil {
-				panic(err.Error())
-			}
-
-			defer insert.Close()
-
-			// Execute the prepared statement with form values
-			_, err = insert.Exec(info, club_id)
-			if err != nil {
-				panic(err.Error())
-			}
-
-		}
-
-		if email != "" {
-			insert, err := db.Prepare("UPDATE clubs SET email=? WHERE club_id=?")
-			if err != nil {
-				panic(err.Error())
-			}
-
-			defer insert.Close()
-
-			// Execute the prepared statement with form values
-			_, err = insert.Exec(info, club_id)
-			if err != nil {
-				panic(err.Error())
-			}
-
-		}
-
-		// fmt.Println("Record inserted successfully")
-		w.Write([]byte("success"))
 	}
+
+	// fmt.Println("Record inserted successfully")
+	w.Write([]byte("success"))
+}

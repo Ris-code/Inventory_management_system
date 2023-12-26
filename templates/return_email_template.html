@@ -1,0 +1,59 @@
+<!-- email_template.html -->
+
+<html>
+<head>
+	<style>
+		table {
+			width: 100%;
+			border-collapse: collapse;
+		}
+
+		table, th, td {
+			border: 1px solid black;
+		}
+
+		th, td {
+			padding: 10px;
+			text-align: left;
+		}
+	</style>
+</head>
+<body>
+	<p>Hello {{.Club}},</p>
+	<p>Greetings from Borowy, a student has returned some club inventories. Please check the details below:</p>
+
+	<p><strong>Borrower Name:</strong> {{.Name}}</p>
+    <p><strong>Borrower Institute Id:</strong> {{.Id}}</p>
+
+	<table>
+		<thead>
+			<tr>
+				<th>Item Name</th>
+				<th>Quantity Borrowed</th>
+				<th>Quantity Left</th>
+				<th>Specified return date</th>
+				<th>Return status</th>
+
+			</tr>
+		</thead>
+		<tbody>
+			{{range .Items}}
+				<tr>
+					<td>{{.Name}}</td>
+					<td>{{.Quantity}}</td>
+					<td>{{.Left}}</td>
+                    <td>{{.ReturnDate}}</td>
+                    <td>{{.Status}}</td>
+				</tr>
+			{{end}}
+		</tbody>
+	</table>
+
+	<p>Thank you</p>
+    <br>
+    <p>Regards,</p>
+    <p>Borowy</p>
+
+    <p><small>This is an automated email, please do not reply.</small></p>
+</body>
+</html>

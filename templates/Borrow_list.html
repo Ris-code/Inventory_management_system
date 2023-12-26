@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-F7YdmMkxqLd9N6fK+3PHI8ntr5BaxN9+T3gEMQ8OCnWtFh8NftQKY26pA24X8F4cg8Qc5ZCDKx8J4+p3/W+xKg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <title>Shopping Cart</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+   <style>
+    .panel-body {
+       display: flex;
+       position: relative;
+       justify-content: space-between;
+       align-items: center;
+       margin-top: 100px;
+   }
+
+    .panel-body a, h3, h2 {
+       color: rgb(0, 0, 0); /* Set the color to black */
+       font-size: 1.5rem; /* Adjust the font size */
+       text-decoration: none; /* Remove the underline */
+   }
+
+   /* Additional styles for responsiveness */
+   @media (max-width: 768px) {
+     .panel-body {
+       flex-direction: column;
+       align-items: flex-start;
+     }
+
+     .panel-body a {
+       margin-top: 10px; /* Adjust the spacing */
+     }
+   }
+
+   .card-body .button-1{
+       background-color: rgb(255, 196, 0);
+       color: rgb(0, 0, 0);
+   }
+   .card-body .button-1 :hover{
+       background-color: rgb(226, 211, 160);
+       color: rgb(0, 0, 0);
+   }
+   .card-body .button-2{
+       background-color: rgb(255, 0, 0);
+       /* color: rgb(0, 0, 0); */
+   }
+ </style>
+</head>
+
+<!-- ... (your HTML head) ... -->
+
+<!-- ... (your HTML head) ... -->
+
+<body>
+  
+  
+  <section class="h-100" style="background-color: wheat;">
+    <div id="nav-container"></div>
+    <div class="container h-100 py-5">
+      
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-10">
+       
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="panel-body">
+            
+            <h1 class="fw-normal mb-4 text-black">Borrowed Items</h1>
+            </div>
+        
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center mb-4" style="gap: 10px;">
+            <!-- <div> -->
+              <!-- <h5 class="font-awesome mb-2 text-black" style="color: rgb(0, 0, 0);">Confirm the selected inventories</h5> -->
+                <!-- <button type="button" class="btn"  onclick="borrowItem()">Borrow</button> -->
+              <!-- <div class="panel-body"> -->
+                <!-- <input type="button" class="btn" value="Back" onclick="window.location.href='/inventory/'"> -->
+                <div>
+                <div class="form-group">
+                    <!-- <label>Select your Club/Society:</label><br> -->
+                    <select name="clubList" id="clubList" class="form-control">
+                        <option value="none" selected disabled hidden>Select a Club/Society</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-block" id="searchButton" onclick="data()">Search</button>
+                <div id="loading-1" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Searching items...
+                  </div>
+            </div>
+                <div>
+                <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return all</button>
+                <div id="loading" style="display: none;">
+                  <i class="fas fa-spinner fa-spin"></i> Returning items...
+                </div>
+                </div>
+
+              <!-- </div> -->
+            <!-- </div> -->
+          </div>
+
+          <div class="card-container" id="card-container">
+            <!-- Cards will be dynamically added here using JavaScript -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+    <script>
+
+    jQuery(document).ready(function($) {
+      $.ajax({
+        url: "/static/navbar.html",
+        type: "GET",
+        dataType: "html",
+        success: function (data) {
+          $("#nav-container").html(data);
+        },
+        error: function () {
+          console.error("Error loading navbar.html");
+        }
+      });
+    });
+
+      
+    
+    // Initialize the "Return All" button as disabled
+    document.getElementById('borrowButton').disabled = true;
+
+    // Initialize an array to store selected cards
+    const selectedCards = [];
+
+    function dynamiccard(shoppingCart) {
+        // Display the shopping cart content dynamically
+        const cardContainer = document.getElementById('card-container');
+
+        if (shoppingCart.length === 0) {
+            cardContainer.innerHTML = '<p style="color: black;">Your shopping cart is empty.</p>';
+        } else {
+            for (let i = 0; i < shoppingCart.length; i++) {
+                const cartItem = shoppingCart[i];
+                const card = document.createElement('div');
+                card.className = 'card rounded-3 mb-4';
+                card.innerHTML = `
+                    <div class="card-body p-4">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col-md-3 col-lg-3 col-xl-3">
+                                <p class="lead fw-normal mb-2 text-black">${cartItem.Name}</p>
+                            </div>
+                            <div class="col-md-3 col-lg-3 col-xl-3">
+                                <p class="lead fw-normal mb-2 text-black" id="quantity-${i}">Quantity: ${cartItem.Quantity}</p>
+                            </div>
+                            <div class="col-md-3 col-lg-3 col-xl-3">
+                                <p class="lead fw-normal mb-2 text-black" id="returndate-${i}">Return Date: ${cartItem.ReturnDate}</p>
+                            </div>
+                            <button type="button" class="btn button-1" onclick="returnItem('${cartItem.Name}', ${i})">Return</button>
+                            <button type="button" class="btn button-2" onclick="cancelReturn('${cartItem.Name}', ${i})">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                cardContainer.appendChild(card);
+            }
+        }
+    }
+
+   // Function to handle returning an item
+function returnItem(name, index) {
+    // Add the card to the selectedCards array
+    selectedCards.push({ name, index });
+
+    // Enable the "Return All" button
+    document.getElementById('borrowButton').disabled = false;
+
+    // Disable the "Return" button if it exists
+    const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
+    if (returnButton) {
+        returnButton.disabled = true;
+    }
+}
+
+// Function to handle canceling the return of an item
+function cancelReturn(name, index) {
+    // Remove the card from the selectedCards array
+    const selectedIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
+    if (selectedIndex !== -1) {
+        selectedCards.splice(selectedIndex, 1);
+    }
+
+    // Enable the "Return" button if it exists
+    const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
+    if (returnButton) {
+        returnButton.disabled = false;
+    }
+
+    // If there are no selected cards, disable the "Return All" button
+    if (selectedCards.length === 0) {
+        document.getElementById('borrowButton').disabled = true;
+    }
+}
+
+
+  // Function to handle returning all items
+  function returnAll() {
+    // Array to store information about deleted items
+    const deletedItems = [];
+    console.log(selectedCards);
+
+    // Remove all selected cards from the array and collect information
+    for (let i = selectedCards.length - 1; i >= 0; i--) {
+        const card = selectedCards[i];
+
+        // Get information from the deleted card
+        const cardElement = document.querySelector(`#card-container .card:nth-child(${card.index + 1})`);
+        var itemName = "";
+        var returnDate = "";
+        if (cardElement) {
+            console.log(cardElement);
+            // Continue with your code
+            itemName = cardElement.querySelector('.lead').textContent.trim();
+            console.log(itemName);
+            // ... rest of the code
+        }
+
+        const quantity = cardElement.querySelector(`#quantity-${card.index}`).textContent.trim().replace('Quantity: ', '');
+        console.log(quantity);
+        const returnDateElement = cardElement.querySelector(`#returndate-${card.index}`);
+        if (returnDateElement) {
+            returnDate = returnDateElement.textContent.trim().replace('Return Date: ', '');
+            // ... rest of the code
+        }
+
+        // Add information to the deletedItems array
+        deletedItems.push({ itemName, quantity, returnDate });
+
+        // Remove the card from the DOM
+        cardElement.remove();
+    }
+
+    // Clear the selectedCards array
+    selectedCards.length = 0;
+
+    // Disable the "Return All" button
+    document.getElementById('borrowButton').disabled = true;
+
+    // Send information to the backend
+    sendDeletedItemsToBackend(deletedItems);
+}
+
+
+    // Function to send deleted items information to the backend
+    function sendDeletedItemsToBackend(deletedItems) {
+        // Implement your code to send the deleted items information to the backend using AJAX or fetch
+        console.log('Deleted Items:', deletedItems);
+
+        const item =[]
+        const quantity = []
+        const returnDate = []
+        const username = sessionStorage.getItem('username');
+        var club = document.getElementById("clubList").value;
+        const id = sessionStorage.getItem('id');
+
+
+        for (let i = 0; i < deletedItems.length; i++) {
+            const deletedItem = deletedItems[i];
+            item.push(deletedItem.itemName);
+            quantity.push(deletedItem.quantity);
+            returnDate.push(deletedItem.returnDate);
+        }
+        // Example AJAX request
+        data = {
+            "item": item,
+            "quantity": quantity,
+            "returnDate": returnDate,
+            "username": username,
+            "club": club,
+            "id": id,
+        }
+
+        console.log("Data:",data);
+
+        $.ajax({
+            type: "POST",
+            url: "/deleteItems/",
+            data: JSON.stringify(data),  // Convert data to JSON
+            contentType: "application/json", 
+            success: function(data) {
+                console.log('Deleted items sent to the backend successfully:', data);
+            },
+            error: function(error) {
+                console.error('Error sending deleted items to the backend:', error);
+            }
+        });
+    
+    }
+
+
+      // Function to borrow item
+      async function borrowItem() {
+
+        function getQueryParams() {
+          const queryParams = window.location.search.substring(1).split('&');
+          const params = {};
+          for (let i = 0; i < queryParams.length; i++) {
+            const pair = queryParams[i].split('=');
+            params[pair[0]] = decodeURIComponent(pair[1]);
+          }
+          return params;
+        }
+
+         // Show loading indicator
+      
+
+        try {
+        const queryParams = getQueryParams();
+        const cartData = queryParams.data;
+        const shoppingCart = JSON.parse(cartData);
+        console.log(shoppingCart);
+
+        const returnDate = document.getElementById('borrowDate').value;
+        const club =  sessionStorage.getItem('club');
+        const name = sessionStorage.getItem('name');
+        const id = sessionStorage.getItem('id');
+        const username = sessionStorage.getItem('username');
+        console.log(club);
+
+        const club_id = sessionStorage.getItem('club_id');
+        console.log(club_id);
+
+        // Check if the return date is entered
+        if (!returnDate) {
+          alert('Please enter the return date.');
+          return;
+        }
+
+        if(shoppingCart.length === 0){
+          alert('Your cart is empty, please add items to the cart.');
+          return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('borrowButton').disabled = true;
+        
+        const itemID = []
+        const quantity = []
+        for (let i = 0; i < shoppingCart.length; i++) {
+            const cartItem = shoppingCart[i];
+            itemID.push(cartItem.item_id);
+            quantity.push(cartItem.quantity);
+        }
+        console.log(itemID);
+        console.log(quantity);
+        const data = {
+            itemID: itemID,
+            Quantity: quantity,
+            club: club,
+            club_id : club_id,
+            returnDate: returnDate,
+            name: name,
+            id : id,
+            username: username
+        }
+        console.log(data);
+                    // Send a POST request to the server
+        const response = await fetch('/update/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          // The request was successful
+          
+          alert('Items borrowed successfully!');
+          window.location.href = "/thank/";
+          // You can redirect or perform any other action here
+        } else {
+          // The request failed
+          alert('Failed to borrow items. Please try again.');
+        }
+    }catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      }finally {
+        // Hide loading indicator
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('borrowButton').disabled = false;
+      }
+}
+      // Function to remove item
+      function removeItem(name) {
+        const cardContainer = document.getElementById("card-container");
+        const cards = cardContainer.querySelectorAll('.card');
+        cards.forEach(card => {
+          const itemName = card.querySelector('.lead').textContent.trim();
+          if (itemName === name) {
+            card.remove();
+            alert(`Removed ${name}`);
+          }
+        });
+      }
+    </script>
+
+    <script>
+        console.log('{{.}}');
+    
+        const backendData = JSON.parse('{{.}}');
+    
+        const items = backendData.Items;
+        const clubList = document.getElementById("clubList");
+    
+        for (let i = 0; i < items.length; i++) {
+            let option = document.createElement("option");
+            option.text = items[i];
+            option.value = items[i];
+            clubList.add(option);
+        }
+    
+    function data() {
+    var club = document.getElementById("clubList").value;
+    var username = sessionStorage.getItem("username");
+
+    document.getElementById('loading-1').style.display = 'block';
+    document.getElementById('searchButton').disabled = true;
+
+    var data = {
+        "username": username,
+        "club": club,
+    };
+
+        $.ajax({
+            type: "POST",
+            url: "/borrowlist/",
+            data: data,
+            success: function (data) {
+                console.log(data);
+                response = JSON.parse(data);
+
+                if (response) {
+                    dynamiccard(response);
+                    // document.getElementById('loading-1').style.display = 'none';
+                    //  document.getElementById('searchButton').disabled = false;
+                } else {
+                    alert("error");
+                    location.reload();
+                }
+            },
+            complete: function () {
+                document.getElementById('loading-1').style.display = 'none';
+                document.getElementById('searchButton').disabled = false;
+            }
+        });
+        }
+
+    </script>
+  
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"></script>
+      <!-- <script>
+        $(function () {
+            $("#nav-container").load("/static/navbar.html");
+        });
+    </script> -->
+  
+  </body>
+  
+  
+  </html>
+  
+
+</html>
