@@ -302,10 +302,16 @@ https://templatemo.com/tm-570-chain-app-dev
       success: function (data) {
         // Do something on success
         console.log(data);
+        // response = JSON.parse(data);
+        // console.log(response.status);
+        console.log(data.status);
 
-        if (data['status']== 'success') {
+        if (data.status === 'success') {
           alert('Item added successfully!');
-        } else {
+        }else if(data.status === 'item_exists'){
+          alert('Item already exists, to update the quantity go to the inventory list!!');
+        }
+        else {
           alert('Item could not be added!');
         }
       }
@@ -347,7 +353,7 @@ https://templatemo.com/tm-570-chain-app-dev
                 // Do something on success
                 console.log(data);
 
-                if (data['status'] == 'success') {
+                if (data.status == 'success') {
                     alert('Profile updated successfully!');
                 } else {
                     alert('Profile could not be updated!');

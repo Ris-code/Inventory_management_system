@@ -106,6 +106,10 @@ type DeleteItemsRequest struct {
 	ID         string   `json:"id"`
 }
 
+type Status struct {
+	Status string `json:"status"`
+}
+
 var collection *mongo.Collection
 
 func init() {
@@ -874,7 +878,7 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Check if the "items" field exists and is an array (bson.A)
-		item_arr, ok := targetClub["items"].(bson.A)
+		item_arr, _ := targetClub["items"].(bson.A)
 
 		fmt.Println("Item Array:", item_arr)
 		fmt.Println("Length:", len(item_arr))
@@ -1120,6 +1124,19 @@ func add_inventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("item:", item)
 	fmt.Println("quantity:", quantity)
 
+	item_check := db.QueryRow("SELECT item FROM items WHERE item=?", item)
+
+	var existingItem string
+	if err := item_check.Scan(&existingItem); err == nil {
+		// Username already exists
+		fmt.Println("Item already exists")
+
+		data := Status{Status: "item_exists"}
+		jsonData, _ := json.Marshal(data)
+		w.Write([]byte(jsonData))
+
+		return
+	}
 	// Get the existing entry present in the database for the given username
 	result := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", name)
 
@@ -1189,9 +1206,13 @@ func add_inventory(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
-
+	data := Status{Status: "success"}
 	fmt.Println("Record inserted successfully")
-	w.Write([]byte("success"))
+	// w.Write([]byte("success"))
+	jsonData, _ := json.Marshal(data)
+
+	w.Write([]byte(jsonData))
+
 }
 
 func update_info(w http.ResponseWriter, r *http.Request) {
@@ -1278,6 +1299,9 @@ func update_info(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	data := Status{Status: "success"}
+
+	jsonData, _ := json.Marshal(data)
 	// fmt.Println("Record inserted successfully")
-	w.Write([]byte("success"))
+	w.Write([]byte(jsonData))
 }
