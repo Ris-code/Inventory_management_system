@@ -53,6 +53,7 @@ type Item struct {
 	Return string `json:"returnDate"`
 	Name string `json:"name"`
 	ID string `json:"id"`
+	Username string `json:"username"`
 }
 
 type user struct {
@@ -65,6 +66,28 @@ type email_Item struct {
 	Left int
 }
 
+// Remove the duplicate declaration of inventory
+type BorrowedItem struct {
+	Name     string `bson:"name"`
+    Quantity int    `bson:"quantity"`
+	ReturnDate string `bson:"return_date"`
+}
+
+type Club_present struct {
+	Club_id string `bson:"club_id"`
+	Club string `bson:"club"`
+	Items []BorrowedItem `bson:"items"`
+}
+
+type student struct {
+	Username     string        `bson:"username"`
+    Name         string        `bson:"name"`
+    InstituteID  string        `bson:"institute_id"`
+	Borrow_status string          `bson:"borrow_status"`
+    Club_info       []Club_present `bson:"club_info"`
+}
+
+var collection *mongo.Collection
 
 func init() {
 	err := godotenv.Load()
@@ -101,14 +124,20 @@ func initmongoDB() {
 		log.Fatal(err)
 	}
 
+	collection = client.Database("Student_inventory_list").Collection("Item_list")
+
+
 	// Check the connection
 	err = client.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	
 	fmt.Println("Connected to MongoDB!")
 }
+
+
+	
 
 func home_before_login(w http.ResponseWriter, r *http.Request) {	
 	t, _ := template.ParseFiles("templates/home_before_login.html")
@@ -203,7 +232,10 @@ func update(w http.ResponseWriter, r *http.Request) {
 	name := updateItem.Name
 	return_date := updateItem.Return
 	id := updateItem.ID
+	username := updateItem.Username
 	email := db.QueryRow("SELECT email FROM clubs WHERE club_id=?", club_id)
+
+	filter := bson.M{"username": username, "club_info.club": club}
 
 	var email_id string
 	if err := email.Scan(&email_id); err != nil {
@@ -266,6 +298,27 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("Item ID:", updateItem.ItemID)
 		fmt.Println("Quantity:", updateItem.Quantity)
+
+		update := bson.M{
+			"$set": bson.M{
+				"borrow_status": "Yes",
+			},
+			"$push": bson.M{
+				"club_info.$.items": bson.M{
+					"name":     setitem,
+					"quantity": updateItem.Quantity[idx],
+					"return_date": return_date,
+				},
+			},
+		}
+
+		updateResult, err := collection.UpdateOne(context.Background(), filter, update)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Matched %v document and modified %v document.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
 	}
 	
 	
@@ -563,6 +616,50 @@ func signup(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("Record inserted successfully")
 		w.Write([]byte("success"))
+
+		all_club, _ := db.Query("SELECT club_id, club FROM clubs")
+
+		var club_data []Club_present
+
+		for all_club.Next() {
+			var club_id string
+			var club string
+
+			err = all_club.Scan(&club_id, &club)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			temp := Club_present{
+				Club_id: club_id,
+				Club: club,
+				Items: []BorrowedItem{},
+			}
+
+			club_data = append(club_data, temp)
+		}
+		// Insert a new document into the collection.
+		user := student{ Username: username, Name: name, InstituteID: id, Borrow_status: "No", Club_info: club_data}
+
+		fmt.Println("user:", user)
+
+		insertResult, err := collection.InsertOne(context.Background(), user)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+
+		// Fetch the inserted document from the collection
+		var insertedUser student
+		filter := bson.M{"_id": insertResult.InsertedID}
+		err = collection.FindOne(context.Background(), filter).Decode(&insertedUser)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Print the entire inserted document
+		fmt.Println("Inserted User:", insertedUser)
 	}
 }
 

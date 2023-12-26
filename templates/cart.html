@@ -187,6 +187,7 @@
         const club =  sessionStorage.getItem('club');
         const name = sessionStorage.getItem('name');
         const id = sessionStorage.getItem('id');
+        const username = sessionStorage.getItem('username');
         console.log(club);
 
         const club_id = sessionStorage.getItem('club_id');
@@ -222,7 +223,8 @@
             club_id : club_id,
             returnDate: returnDate,
             name: name,
-            id : id
+            id : id,
+            username: username
         }
         console.log(data);
                     // Send a POST request to the server
