@@ -195,7 +195,7 @@ https://templatemo.com/tm-570-chain-app-dev
                   </div>
                 
                   <div class="white-button second-button scroll-to-section">
-                    <a href="/club/">Borrowers list <i class="fa fa-sign-in-alt"></i></a>
+                    <a href="/clubborrowlist/">Borrowers list <i class="fa fa-sign-in-alt"></i></a>
                   </div>
 
                   <div class="white-button third-button scroll-to-section" onclick="openModal()">
@@ -365,6 +365,27 @@ https://templatemo.com/tm-570-chain-app-dev
         console.log('Description:', desp);
         console.log('Pic:', pic);
         console.log('Email:', email);
+    }
+
+    function openlist(){
+        var clubname = sessionStorage.getItem("club_name");
+        console.log(clubname);
+
+        var data = {
+            "club": clubname
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/clubborrowlist/",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function(data){
+                console.log(data);
+                // sessionStorage.setItem("borrowlist", data);
+                window.location.href = "/clubborrowlist/";
+            }
+        });
     }
 </script>
 

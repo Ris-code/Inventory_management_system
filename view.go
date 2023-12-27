@@ -32,84 +32,6 @@ import (
 var db *sql.DB
 var err error
 
-type item_info struct {
-	Item_id  []string
-	Club     string
-	Club_id  string
-	Items    []string
-	Quantity []int
-}
-
-type club_info struct {
-	Club_id []string
-	Club    []string
-	Info    []string
-	Link    []string
-}
-
-type Item struct {
-	ItemID   []string `json:"itemID"`
-	Quantity []int    `json:"Quantity"`
-	Club_id  string   `json:"club_id"`
-	Club     string   `json:"club"`
-	Return   string   `json:"returnDate"`
-	Name     string   `json:"name"`
-	ID       string   `json:"id"`
-	Username string   `json:"username"`
-}
-
-type user struct {
-	Username string
-	ID       string
-}
-
-type email_Item struct {
-	Name     string
-	Quantity int
-	Left     int
-}
-type return_email_Item struct {
-	Name       string
-	Quantity   int
-	Left       int
-	ReturnDate string
-	Status     string
-}
-
-// Remove the duplicate declaration of inventory
-type BorrowedItem struct {
-	Name       string `bson:"name"`
-	Quantity   int    `bson:"quantity"`
-	ReturnDate string `bson:"return_date"`
-}
-
-type Club_present struct {
-	Club_id       string         `bson:"club_id"`
-	Club          string         `bson:"club"`
-	Borrow_status string         `bson:"borrow_status"`
-	Items         []BorrowedItem `bson:"items"`
-}
-
-type student struct {
-	Username    string         `bson:"username"`
-	Name        string         `bson:"name"`
-	InstituteID string         `bson:"institute_id"`
-	Club_info   []Club_present `bson:"club_info"`
-}
-
-type DeleteItemsRequest struct {
-	Item       []string `json:"item"`
-	Quantity   []string `json:"quantity"`
-	ReturnDate []string `json:"returnDate"`
-	Username   string   `json:"username"`
-	Club       string   `json:"club"`
-	ID         string   `json:"id"`
-}
-
-type Status struct {
-	Status string `json:"status"`
-}
-
 var collection *mongo.Collection
 
 func init() {
@@ -1304,4 +1226,100 @@ func update_info(w http.ResponseWriter, r *http.Request) {
 	jsonData, _ := json.Marshal(data)
 	// fmt.Println("Record inserted successfully")
 	w.Write([]byte(jsonData))
+}
+
+func club_borrow_list(w http.ResponseWriter, r *http.Request){
+
+	fmt.Println("method:", r.Method) // get request method
+	if r.Method == "GET" {
+		t,_ := template.ParseFiles("templates/club_borrower_list.html")
+		t.Execute(w, nil)
+	} else if r.Method == "POST" {
+
+	var requestData map[string]string
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Extract the club name from the JSON data
+	club := requestData["club"]
+
+	fmt.Println("club:", club)
+
+	// select all the users and their items they borrowed from this club from mongoDB
+
+	filter := bson.M{"club_info.club": club, "club_info.borrow_status": "Yes"}
+
+	
+	
+	cur, err := collection.Find(context.Background(), filter)
+
+	if err != nil {
+
+		log.Fatal(err)
+
+	}
+
+	defer cur.Close(context.Background())
+
+	var students []student
+
+	for cur.Next(context.Background()) {
+
+		var s student
+
+		err := cur.Decode(&s)
+
+		if err != nil {
+
+			log.Fatal(err)
+
+		}
+
+		 // Filter the student data to include only the "Sangam" club
+		 var filteredClubInfo []Club_present
+		 for _, c := range s.Club_info {
+			 if c.Club == club {
+				 filteredClubInfo = append(filteredClubInfo, c)
+			 }
+		 }
+		 s.Club_info = filteredClubInfo
+
+
+
+		students = append(students, s)
+
+	}
+
+	if err := cur.Err(); err != nil {
+		
+		log.Fatal(err)
+
+	}
+
+	cur.Close(context.Background())
+
+	fmt.Println("Student:", students)
+
+	// Convert the struct to JSON
+
+	jsonData, _ := json.Marshal(students)
+
+	// tmpl, err := template.ParseFiles("templates/club_borrower_list.html")
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// // Set the response headers
+	// w.Header().Set("Content-Type", "text/html")
+
+	// // Execute the template and write the result to the response
+	// if err := tmpl.Execute(w, jsonData); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	w.Write([]byte(jsonData))
+}
 }
