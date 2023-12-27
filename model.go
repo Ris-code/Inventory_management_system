@@ -81,3 +81,8 @@ type Status struct {
 type club_borrow struct {
 	Club string `json:"club"`
 }
+
+type item_list struct {
+	Item     string `json:"item"`
+	Quantity int    `json:"quantity"`
+}

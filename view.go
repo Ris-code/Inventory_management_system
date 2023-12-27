@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 
 	"bytes"
@@ -66,7 +65,9 @@ func initmongoDB() {
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		fmt.Println("Error:", err)
+		return
 	}
 
 	collection = client.Database("Student_inventory_list").Collection("Item_list")
@@ -74,7 +75,9 @@ func initmongoDB() {
 	// Check the connection
 	err = client.Ping(context.Background(), readpref.Primary())
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		fmt.Println("Error:", err)
+		return
 	}
 
 	fmt.Println("Connected to MongoDB!")
@@ -252,7 +255,9 @@ func update(w http.ResponseWriter, r *http.Request) {
 		updateResult, err := collection.UpdateOne(context.Background(), filter, update)
 
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
 		}
 
 		fmt.Printf("Matched %v document and modified %v document.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
@@ -593,7 +598,9 @@ func signup(w http.ResponseWriter, r *http.Request) {
 
 		insertResult, err := collection.InsertOne(context.Background(), user)
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
 		}
 
 		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
@@ -603,7 +610,9 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		filter := bson.M{"_id": insertResult.InsertedID}
 		err = collection.FindOne(context.Background(), filter).Decode(&insertedUser)
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
 		}
 
 		// Print the entire inserted document
@@ -672,7 +681,9 @@ func borrow_list(w http.ResponseWriter, r *http.Request) {
 		err := collection.FindOne(context.Background(), filter).Decode(&student)
 
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
 		}
 
 		fmt.Println("Student:", student)
@@ -728,6 +739,22 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("quantity:", quantity)
 	fmt.Println("returnDate:", returnDate)
 
+	name_id := db.QueryRow("SELECT name FROM student WHERE username=?", username)
+
+	var name string
+
+	if err := name_id.Scan(&name); err != nil {
+		// If an entry with the username does not exist, send an "Unauthorized"(401) status
+
+		if err == sql.ErrNoRows {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		// If the error is of any other type, send a 500 status
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	result := db.QueryRow("SELECT email FROM clubs WHERE club=?", club)
 
 	var email_id string
@@ -772,7 +799,10 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 		// Execute the $pull operation
 		_, err := collection.UpdateOne(context.TODO(), filter, update)
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
+
 		}
 
 		filter = bson.M{"username": username}
@@ -781,13 +811,17 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 		var result bson.M
 		err = collection.FindOne(context.TODO(), filter).Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
 		}
 
 		// Check if "club_info" field exists
 		clubInfo, ok := result["club_info"].(bson.A)
 		if !ok {
-			log.Fatal("Club information not found.")
+			// log.Fatal("Club information not found.")
+			fmt.Println("Club information not found.")
+			return
 		}
 
 		// Find the specific club
@@ -805,16 +839,25 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Item Array:", item_arr)
 		fmt.Println("Length:", len(item_arr))
 
+		var targetClubIndex int
+		for i, c := range clubInfo {
+			if c.(bson.M)["club"].(string) == club {
+				targetClubIndex = i
+				break
+			}
+		}
+
 		if len(item_arr) == 0 {
 			// If it's 0, set borrow_status to "No"
 			update = bson.M{
 				"$set": bson.M{
-					"club_info.$.borrow_status": "No",
+					fmt.Sprintf("club_info.%d.borrow_status", targetClubIndex): "No",
 				},
 			}
 			_, err = collection.UpdateOne(context.TODO(), filter, update)
 			if err != nil {
-				log.Fatal(err)
+				// log.Fatal(err)
+				fmt.Println("Error:", err)
 			}
 		}
 
@@ -871,7 +914,7 @@ func delete_items(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	send_return_email(username, club, id, email_id, delete_item_arr)
+	send_return_email(name, club, id, email_id, delete_item_arr)
 }
 
 func send_return_email(username string, club string, id string, email_id string, items []return_email_Item) {
@@ -1228,14 +1271,198 @@ func update_info(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(jsonData))
 }
 
-func club_borrow_list(w http.ResponseWriter, r *http.Request){
+func club_borrow_list(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("method:", r.Method) // get request method
 	if r.Method == "GET" {
-		t,_ := template.ParseFiles("templates/club_borrower_list.html")
+		t, _ := template.ParseFiles("templates/club_borrower_list.html")
 		t.Execute(w, nil)
 	} else if r.Method == "POST" {
 
+		var requestData map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Extract the club name from the JSON data
+		club := requestData["club"]
+
+		fmt.Println("club:", club)
+
+		// select all the users and their items they borrowed from this club from mongoDB
+
+		filter := bson.M{"club_info.club": club, "club_info.borrow_status": "Yes"}
+
+		cur, err := collection.Find(context.Background(), filter)
+
+		if err != nil {
+
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
+
+		}
+
+		defer cur.Close(context.Background())
+
+		var students []student
+
+		for cur.Next(context.Background()) {
+
+			var s student
+
+			err := cur.Decode(&s)
+
+			if err != nil {
+
+				// log.Fatal(err)
+				fmt.Println("Error:", err)
+				return
+
+			}
+
+			// Filter the student data to include only the "Sangam" club
+			var filteredClubInfo []Club_present
+			for _, c := range s.Club_info {
+				if c.Club == club {
+					filteredClubInfo = append(filteredClubInfo, c)
+				}
+			}
+			s.Club_info = filteredClubInfo
+
+			students = append(students, s)
+
+		}
+
+		if err := cur.Err(); err != nil {
+
+			// log.Fatal(err)
+			fmt.Println("Error:", err)
+			return
+
+		}
+
+		cur.Close(context.Background())
+
+		fmt.Println("Student:", students)
+
+		// Convert the struct to JSON
+
+		jsonData, _ := json.Marshal(students)
+
+		w.Write([]byte(jsonData))
+	}
+}
+
+func inventorylist(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("method:", r.Method) // get request method
+	if r.Method == "GET" {
+		t, _ := template.ParseFiles("templates/inventory_list.html")
+		t.Execute(w, nil)
+	} else if r.Method == "POST" {
+
+		var requestData map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Extract the club name from the JSON data
+		club := requestData["club"]
+
+		fmt.Println("club:", club)
+
+		// select all the users and their items they borrowed from this club from mongoDB
+		id := db.QueryRow("SELECT club_id FROM clubs WHERE club=?", club)
+
+		var club_id string
+
+		if err := id.Scan(&club_id); err != nil {
+			// If an entry with the username does not exist, send an "Unauthorized"(401) status
+			if err == sql.ErrNoRows {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
+
+		result, err := db.Query("SELECT items.item, items.quantity FROM items INNER JOIN clubs ON clubs.club_id=items.club_id WHERE clubs.club_id=?", club_id)
+
+		if err != nil {
+			// Handle the error (log it or return an error response)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		defer result.Close()
+
+		var items []item_list
+
+		for result.Next() {
+			var item string
+			var quantity int
+
+			_ = result.Scan(&item, &quantity)
+			temp := item_list{
+				Item:     item,
+				Quantity: quantity,
+			}
+
+			items = append(items, temp)
+		}
+
+		// Convert the struct to JSON
+		fmt.Println("Items:", items)
+		jsonData, _ := json.Marshal(items)
+		// fmt.Println("JSON:", jsonData)
+
+		w.Write([]byte(jsonData))
+	}
+}
+
+func edit_inventory (w http.ResponseWriter, r *http.Request){
+	fmt.Println("method:", r.Method) // get request method
+
+	// r.ParseForm()
+	// // logic part of sign up
+	// var item = r.FormValue("item")
+	// var quantity = r.FormValue("quantity")
+	decoder := json.NewDecoder(r.Body)
+	var item item_list
+	err := decoder.Decode(&item)
+	if err != nil {
+		http.Error(w, "Error decoding JSON request", http.StatusBadRequest)
+		return
+	}
+
+	item_name := item.Item
+	quantity := item.Quantity
+
+	fmt.Println("item:", item_name)
+	fmt.Println("quantity:", quantity)
+
+	// Insert the new user into the database
+	insert, err := db.Prepare("UPDATE items SET quantity=? WHERE item=?")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer insert.Close()
+
+	// Execute the prepared statement with form values
+	_, err = insert.Exec(quantity, item_name)
+	if err != nil {
+		panic(err.Error())
+	}
+	data := Status{Status: "success"}
+	fmt.Println("Record inserted successfully")
+	// w.Write([]byte("success"))
+	jsonData, _ := json.Marshal(data)
+
+	w.Write([]byte(jsonData))
+}
+
+func delete_inventory (w http.ResponseWriter, r *http.Request){
 	var requestData map[string]string
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -1243,83 +1470,23 @@ func club_borrow_list(w http.ResponseWriter, r *http.Request){
 	}
 
 	// Extract the club name from the JSON data
-	club := requestData["club"]
+	item := requestData["item"]
 
-	fmt.Println("club:", club)
+	fmt.Println("item:", item)
 
-	// select all the users and their items they borrowed from this club from mongoDB
+	// delete item from items
 
-	filter := bson.M{"club_info.club": club, "club_info.borrow_status": "Yes"}
-
-	
-	
-	cur, err := collection.Find(context.Background(), filter)
+	_, err := db.Exec("DELETE FROM items WHERE item=?", item)
 
 	if err != nil {
-
-		log.Fatal(err)
-
+		// If there is an issue with the database, return a 500 error
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
-	defer cur.Close(context.Background())
+	data := Status{Status: "success"}
 
-	var students []student
+	jsonData, _ := json.Marshal(data)
 
-	for cur.Next(context.Background()) {
-
-		var s student
-
-		err := cur.Decode(&s)
-
-		if err != nil {
-
-			log.Fatal(err)
-
-		}
-
-		 // Filter the student data to include only the "Sangam" club
-		 var filteredClubInfo []Club_present
-		 for _, c := range s.Club_info {
-			 if c.Club == club {
-				 filteredClubInfo = append(filteredClubInfo, c)
-			 }
-		 }
-		 s.Club_info = filteredClubInfo
-
-
-
-		students = append(students, s)
-
-	}
-
-	if err := cur.Err(); err != nil {
-		
-		log.Fatal(err)
-
-	}
-
-	cur.Close(context.Background())
-
-	fmt.Println("Student:", students)
-
-	// Convert the struct to JSON
-
-	jsonData, _ := json.Marshal(students)
-
-	// tmpl, err := template.ParseFiles("templates/club_borrower_list.html")
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// // Set the response headers
-	// w.Header().Set("Content-Type", "text/html")
-
-	// // Execute the template and write the result to the response
-	// if err := tmpl.Execute(w, jsonData); err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
 	w.Write([]byte(jsonData))
-}
 }

@@ -215,14 +215,23 @@ function cancelReturn(name, index) {
   function returnAll() {
     // Array to store information about deleted items
     const deletedItems = [];
-    console.log(selectedCards);
+    console.log("selected-cards",selectedCards);
 
     // Remove all selected cards from the array and collect information
-    for (let i = selectedCards.length - 1; i >= 0; i--) {
+    const size = selectedCards.length;
+    for (let i = size-1; i>=0; i--) {
         const card = selectedCards[i];
+        
+        const cardSelector = `#card-container .card:nth-child(${card.index+1})`;
+        const cardElement = document.querySelector(cardSelector);
+
+        console.log('Card Selector:', cardSelector);
+        console.log('Card Element:', cardElement);
+
+// Rest of your code...
 
         // Get information from the deleted card
-        const cardElement = document.querySelector(`#card-container .card:nth-child(${card.index + 1})`);
+        // const cardElement = document.querySelector(`#card-container .card:nth-child(${card.index + 1})`);
         var itemName = "";
         var returnDate = "";
         if (cardElement) {
@@ -297,6 +306,7 @@ function cancelReturn(name, index) {
             contentType: "application/json", 
             success: function(data) {
                 console.log('Deleted items sent to the backend successfully:', data);
+                location.reload();
             },
             error: function(error) {
                 console.error('Error sending deleted items to the backend:', error);

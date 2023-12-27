@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-F7YdmMkxqLd9N6fK+3PHI8ntr5BaxN9+T3gEMQ8OCnWtFh8NftQKY26pA24X8F4cg8Qc5ZCDKx8J4+p3/W+xKg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <title>Shopping Cart</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  
+   <style>
+    .panel-body {
+       display: flex;
+       position: relative;
+       justify-content: space-between;
+       align-items: center;
+       margin-top: 100px;
+   }
+
+    .panel-body a, h3, h2 {
+       color: rgb(0, 0, 0); /* Set the color to black */
+       font-size: 1.5rem; /* Adjust the font size */
+       text-decoration: none; /* Remove the underline */
+   }
+
+   /* Additional styles for responsiveness */
+   @media (max-width: 768px) {
+     .panel-body {
+       flex-direction: column;
+       align-items: flex-start;
+     }
+
+     .panel-body a {
+       margin-top: 10px; /* Adjust the spacing */
+     }
+   }
+
+   .card-body .button-1{
+       background-color: rgb(255, 196, 0);
+       color: rgb(0, 0, 0);
+   }
+   .card-body .button-1 :hover{
+       background-color: rgb(226, 211, 160);
+       color: rgb(0, 0, 0);
+   }
+   .card-body .button-2{
+       background-color: rgb(255, 0, 0);
+       /* color: rgb(0, 0, 0); */
+   }
+ </style>
+</head>
+
+<!-- ... (your HTML head) ... -->
+
+<!-- ... (your HTML head) ... -->
+
+<body>
+   
+    <div class="modal fade" id="editQuantityModal" tabindex="-1" role="dialog" aria-labelledby="editQuantityModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editQuantityModalLabel">Edit Quantity</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label for="newQuantity">New Quantity:</label>
+          <input type="number" class="form-control" id="newQuantity">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="saveQuantity()">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <section class="h-100" style="background-color: cornsilk;">
+    <div id="nav-container"></div>
+    <div class="container h-100 py-5">
+      
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-10">
+       
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="panel-body">
+            
+            <h1 class="fw-normal mb-4 text-black">Inventory List</h1>
+            </div>
+        
+          </div>
+          
+   
+
+          <div class="card-container" id="card-container">
+            <!-- Cards will be dynamically added here using JavaScript -->
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+  <script>
+    jQuery(document).ready(function ($) {
+      $.ajax({
+        url: "/static/navbar_2.html",
+        type: "GET",
+        dataType: "html",
+        success: function (data) {
+          $("#nav-container").html(data);
+        },
+        error: function () {
+          console.error("Error loading navbar.html");
+        }
+      });
+    });
+
+    function dynamiccard(inventoryList) {
+      const cardContainer = document.getElementById('card-container');
+
+      if (inventoryList.length === 0) {
+        cardContainer.innerHTML = '<p style="color: black;">Your inventory is empty.</p>';
+      } else {
+        for (let i = 0; i < inventoryList.length; i++) {
+          const inventoryItem = inventoryList[i];
+          const card = document.createElement('div');
+          card.className = 'card rounded-3 mb-4';
+          card.innerHTML = `
+            <div class="card-body p-4">
+              <div class="row d-flex justify-content-between align-items-center">
+                <div class="col-md-3 col-lg-3 col-xl-2">
+                  <p class="lead fw-normal mb-2 text-black">${inventoryItem.item}</p>
+                </div>
+                <div class="col-md-3 col-lg-3 col-xl-3">
+                  <p class="lead fw-normal mb-2 text-black">Quantity: ${inventoryItem.quantity}</p>
+                </div>
+                <button type="button" class="btn button-1 itemListBtn" onclick="editItem(this, ${i})">Edit</button>
+                <button type="button" class="btn button-2 itemListBtn" onclick="deleteItem(this, ${i})">Delete</button>
+              </div>
+            </div>
+          `;
+          cardContainer.appendChild(card);
+        }
+      }
+    }
+
+    function deleteItem(button, index) {
+      const confirmation = confirm('Are you sure you want to delete this item?');
+      if (confirmation) {
+        // Perform delete action here
+        // Send data to backend for deletion
+        const inventoryItem = response[index];
+        sendDeleteRequest(inventoryItem);
+
+        // Remove the card from the UI
+        button.closest('.card').remove();
+      }
+    }
+
+    function sendDeleteRequest(inventoryItem) {
+      // Implement your code to send data to backend for deletion
+      console.log('Sending delete request for item:', inventoryItem);
+
+        const data = {
+            "item": inventoryItem.item,
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/inventorylist/delete/",
+            data: JSON.stringify(data),  // Convert data to JSON
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data);
+                response = JSON.parse(data);
+                console.log(response);
+                if (response.status === "success") {
+                    alert("Item deleted successfully");
+                    location.reload();
+                } else {
+                    alert("Error deleting item");
+                }
+            },
+            error: function (error) {
+                console.error('Error loading inventory list:', error);
+            }
+        });
+    }
+
+    function editItem(button, index) {
+      // Set the index as a data attribute on the modal
+      $('#editQuantityModal').data('index', index);
+
+      // Show the modal
+      $('#editQuantityModal').modal('show');
+    }
+
+    function saveQuantity() {
+      const index = $('#editQuantityModal').data('index');
+      const newQuantity = $('#newQuantity').val();
+
+      if (newQuantity !== "") {
+        // Perform edit action here
+        // Update the UI with the new quantity
+        const quantityElement = $('.card').eq(index).find('.col-md-3.col-lg-3.col-xl-3 p');
+        quantityElement.text(`Quantity: ${newQuantity}`);
+
+        const nameElement = $('.card').eq(index).find('.col-md-3.col-lg-3.col-xl-2 p');
+        const name = nameElement.text();
+        console.log(name);
+        // Send data to backend for updating
+        const inventoryItem = response[index];
+        sendEditRequest(inventoryItem, newQuantity);
+
+        // Close the modal
+        $('#editQuantityModal').modal('hide');
+      }
+    }
+
+    function sendEditRequest(inventoryItem, newQuantity) {
+      // Implement your code to send data to backend for editing
+      console.log('Sending edit request for item:', inventoryItem, 'New Quantity:', newQuantity);
+        console.log(typeof newQuantity)
+        const data = {
+            "item": inventoryItem.item,
+            "quantity": parseInt(newQuantity),
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "/inventorylist/edit/",
+            data: JSON.stringify(data),  // Convert data to JSON
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data);
+                response = JSON.parse(data);
+                console.log(response);
+                if (response.status === "success") {
+                    alert("Quantity updated successfully");
+                    location.reload();
+                } else {
+                    alert("Error updating quantity");
+                }
+            },
+            error: function (error) {
+                console.error('Error loading inventory list:', error);
+            }
+        });
+    }
+
+    var club = sessionStorage.getItem("club_name");
+
+    const data = {
+      "club": club,
+    };
+
+    $.ajax({
+      type: "POST",
+      url: "/inventorylist/",
+      data: JSON.stringify(data),  // Convert data to JSON
+      contentType: "application/json",
+      success: function (data) {
+        console.log(data);
+        response = JSON.parse(data);
+        dynamiccard(response);
+      },
+      error: function (error) {
+        console.error('Error loading inventory list:', error);
+      }
+    });
+  </script>
+  
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"></script>
+    
+
+  </body>
+  
+  
+  </html>

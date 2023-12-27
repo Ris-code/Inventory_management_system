@@ -36,6 +36,9 @@ func main() {
 	r.HandleFunc("/additem/", add_inventory)
 	r.HandleFunc("/updateinfo/", update_info)
 	r.HandleFunc("/clubborrowlist/", club_borrow_list)
+	r.HandleFunc("/inventorylist/", inventorylist)
+	r.HandleFunc("/inventorylist/edit/", edit_inventory)
+	r.HandleFunc("/inventorylist/delete/", delete_inventory)
 	
 
 	// Enable CORS for all routes
