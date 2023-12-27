@@ -54,6 +54,16 @@
        background-color: rgb(255, 0, 0);
        /* color: rgb(0, 0, 0); */
    }
+   .panel input{
+        width: 100%;
+        height: 50px;
+        border-radius: 10px;
+        border: 1px solid rgb(0, 0, 0);
+        padding: 0 20px;
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-bottom: 20px;
+   }
  </style>
 </head>
 
@@ -101,7 +111,9 @@
         
           </div>
           
-   
+          <div class="panel">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
+         </div>
 
           <div class="card-container" id="card-container">
             <!-- Cards will be dynamically added here using JavaScript -->
@@ -128,6 +140,26 @@
         }
       });
     });
+
+    function performSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const filter = searchInput.value.toUpperCase();
+      const cardContainer = document.getElementById('card-container');
+      const cards = cardContainer.getElementsByClassName('card');
+
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const cardBody = card.getElementsByClassName('card-body')[0];
+        const item = cardBody.getElementsByTagName('p')[0];
+        const itemText = item.innerText.toUpperCase();
+
+        if (itemText.indexOf(filter) > -1) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      }
+    }
 
     function dynamiccard(inventoryList) {
       const cardContainer = document.getElementById('card-container');

@@ -297,18 +297,36 @@ h1:after {
   }
 }
 
+.alt-two input {
+  width: 100%;
+  padding: 1em;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 14px;
+  color: #666;
+  outline: none;
+  margin-bottom: 1em;
+  margin-top: 10px;
+  -webkit-appearance: none;
+}
+
   </style>
   
 </head>
 <body>
   <div id="nav-container"></div>
 <div class="main">  
+  <!-- <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()"> -->
 
     <div class="two alt-two">
             <h1 class="heading">Choose A Club
               <span>To Borrow The Inventory</span>
             </h1>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by club name" oninput="performSearch()">
     </div>
+    
+   
+    
   <div class="grid" id="grid">
 
     <!-- <div class="card">
@@ -400,6 +418,29 @@ h1:after {
 }
 </script> -->
 <script>
+
+    function performSearch() {
+            console.log("enter");
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const cardContainer = document.getElementById('grid');
+            const cards = cardContainer.getElementsByClassName('col-md-4');
+
+            console.log(searchInput);
+            console.log(cards);
+
+            for (const card of cards) {
+                const itemName = card.querySelector('.card__content h1').textContent.toLowerCase();
+
+                // Check if the search query is found in the item name
+                if (itemName.includes(searchInput)) {
+                    console.log(1);
+                    card.style.display = 'block'; // Show the card
+                } else {
+                    card.style.display = 'none'; // Hide the card
+                }
+            }
+        }
+
     function card(id) {
       // Construct the URL for the inventory page with the provided ID
       const inventoryURL = `/inventory/${encodeURIComponent(id)}/`;

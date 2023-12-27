@@ -682,6 +682,12 @@ func borrow_list(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			// log.Fatal(err)
+			var status Status
+			status.Status = "unsuccessfull"
+
+			jsonData, err := json.Marshal(status)
+
+			w.Write([]byte(jsonData))
 			fmt.Println("Error:", err)
 			return
 		}

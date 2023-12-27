@@ -125,7 +125,8 @@
             </div>
             <section class="panel">
                 <div class="panel-body">
-                    <input type="text" placeholder="Keyword Search" class="form-control" />
+                    <!-- Add this input field where you want the search box to appear -->
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
                     <button class="btn" onclick="cart()"> <i class="fa fa-shopping-cart"></i> Borrow</button>
                 </div>
             </section>
@@ -263,6 +264,49 @@
         function return_to_home_first() {
             window.location.href = `/`;
         }
+
+        // Add this function to your existing script
+        // function performSearch() {
+        // const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        // const cardContainer = document.getElementById('card-container');
+        // const cards = cardContainer.getElementsByClassName('card');
+
+        // for (const card of cards) {
+        //     const itemName = card.querySelector('.col-md-3.col-lg-3.col-xl-2 p').textContent.toLowerCase();
+
+        //     // Check if the search query is found in the item name
+        //     if (itemName.includes(searchInput)) {
+        //     card.style.display = 'block'; // Show the card
+        //     } else {
+        //     card.style.display = 'none'; // Hide the card
+        //     }
+        // }
+        // }
+
+        // Add this function to your existing script
+
+        function performSearch() {
+            console.log("enter");
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const cardContainer = document.getElementById('product-list-container');
+            const cards = cardContainer.getElementsByClassName('col-xs-12 col-sm-6 col-md-4');
+
+            console.log(searchInput);
+            console.log(cards);
+
+            for (const card of cards) {
+                const itemName = card.querySelector('.item-name span h3').textContent.toLowerCase();
+
+                // Check if the search query is found in the item name
+                if (itemName.includes(searchInput)) {
+                    console.log(1);
+                    card.style.display = 'block'; // Show the card
+                } else {
+                    card.style.display = 'none'; // Hide the card
+                }
+            }
+        }
+
 
         // Initialize the typewrite effect
         var TxtType = function (el, toRotate, period) {

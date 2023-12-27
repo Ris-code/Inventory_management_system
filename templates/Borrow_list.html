@@ -54,6 +54,15 @@
        background-color: rgb(255, 0, 0);
        /* color: rgb(0, 0, 0); */
    }
+
+   .panel input{
+       width: 100%;
+       padding: 12px 20px;
+       margin: 4px 0;
+       border: 1px solid #060606;
+       box-sizing: border-box;
+   }
+
  </style>
 </head>
 
@@ -92,13 +101,18 @@
                         <option value="none" selected disabled hidden>Select a Club/Society</option>
                     </select>
                 </div>
+                
                 <button type="button" class="btn btn-block" id="searchButton" onclick="data()">Search</button>
                 <div id="loading-1" style="display: none;">
                     <i class="fas fa-spinner fa-spin"></i> Searching items...
                   </div>
+
+            </div>
+            <div class="panel">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
             </div>
                 <div>
-                <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return all</button>
+                <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return selected items</button>
                 <div id="loading" style="display: none;">
                   <i class="fas fa-spinner fa-spin"></i> Returning items...
                 </div>
@@ -134,7 +148,27 @@
       });
     });
 
+    function performSearch() {
+        // Declare variables
+        var input, filter, cardContainer, cards, card, cardBody, title, i, txtValue;
+        input = document.getElementById('searchInput');
+        filter = input.value.toUpperCase();
+        cardContainer = document.getElementById("card-container");
+        cards = cardContainer.getElementsByClassName('card');
       
+        // Loop through all cards, and hide those who don't match the search query
+        for (i = 0; i < cards.length; i++) {
+          card = cards[i];
+          cardBody = card.getElementsByClassName("card-body")[0];
+          title = cardBody.getElementsByClassName("lead")[0];
+          txtValue = title.textContent || title.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            card.style.display = "";
+          } else {
+            card.style.display = "none";
+          }
+        }
+      }
     
     // Initialize the "Return All" button as disabled
     document.getElementById('borrowButton').disabled = true;
@@ -262,7 +296,8 @@ function cancelReturn(name, index) {
 
     // Disable the "Return All" button
     document.getElementById('borrowButton').disabled = true;
-
+    alert("Items returned successfully");
+    location.reload();
     // Send information to the backend
     sendDeletedItemsToBackend(deletedItems);
 }
@@ -306,7 +341,7 @@ function cancelReturn(name, index) {
             contentType: "application/json", 
             success: function(data) {
                 console.log('Deleted items sent to the backend successfully:', data);
-                location.reload();
+                // location.reload();
             },
             error: function(error) {
                 console.error('Error sending deleted items to the backend:', error);
@@ -350,14 +385,13 @@ function cancelReturn(name, index) {
             success: function (data) {
                 console.log(data);
                 response = JSON.parse(data);
-
-                if (response) {
-                    dynamiccard(response);
-                    // document.getElementById('loading-1').style.display = 'none';
-                    //  document.getElementById('searchButton').disabled = false;
-                } else {
-                    alert("error");
+               console.log(response.status);
+              if (response.status === "unsuccessfull") {
+                console.log("No items borrowed");
+                    alert("No items borrowed");
                     location.reload();
+                } else{
+                  dynamiccard(response);
                 }
             },
             complete: function () {

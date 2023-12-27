@@ -72,10 +72,14 @@
                 <!-- <button type="button" class="btn"  onclick="borrowItem()">Borrow</button> -->
               <!-- <div class="panel-body"> -->
                 <!-- <input type="button" class="btn" value="Back" onclick="window.location.href='/inventory/'"> -->
+               
                 <span>
                 <h5 style="color: black;">Enter return date </h5>
                 <input type="date" id="borrowDate" class="form-control" placeholder="Enter the return date" required>
                 </span>
+               
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
+
                 <div>
                 <button type="button" class="btn"  id="borrowButton" onclick="borrowItem()">Borrow</button>
                 <div id="loading" style="display: none;">
@@ -160,6 +164,28 @@
           }
         }
       };
+
+      function performSearch() {
+            console.log("enter");
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const cardContainer = document.getElementById('card-container');
+            const cards = cardContainer.getElementsByClassName('card rounded-3 mb-4');
+
+            console.log(searchInput);
+            console.log(cards);
+
+            for (const card of cards) {
+                const itemName = card.querySelector('.col-md-3.col-lg-3.col-xl-3 p').textContent.toLowerCase();
+
+                // Check if the search query is found in the item name
+                if (itemName.includes(searchInput)) {
+                    console.log(1);
+                    card.style.display = 'block'; // Show the card
+                } else {
+                    card.style.display = 'none'; // Hide the card
+                }
+            }
+        }
   
       // Function to borrow item
       async function borrowItem() {
