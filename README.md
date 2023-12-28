@@ -11,7 +11,7 @@
 
 ## Introduction
 
-A concise introduction to your project. Explain what problem it solves and why it's beneficial. Highlight any unique selling points.
+The Club Inventory Management System is a comprehensive solution designed to streamline and optimize the management of resources within college clubs and societies. This intuitive system provides a user-friendly interface for club coordinators and members to efficiently handle club inventories, track item borrowings, and manage overall club logistics. By seamlessly integrating with databases, the system ensures accurate and real-time updates, enhancing the overall organizational efficiency of college clubs. From dynamic inventory displays to secure user authentication, the Club Inventory Management System offers a robust platform tailored to meet the diverse needs of club administrators and members alike.
 
 ## Features
 - The application is developed for two types of users
@@ -112,7 +112,7 @@ A concise introduction to your project. Explain what problem it solves and why i
   - `Description`:
     - `item_id`  varchar(50) PRIMARY KEY
     - `item` varchar(500)
-    - `club_id` varchar(10) FOREIGN KEY REFERENCE from Clubs(club_id)
+    - `club_id` varchar(10) FOREIGN KEY REFERENCE from `Clubs(club_id)`
     - `quantity` int
 
 - `Student` : This table is designed for the purpose to store all the student information.
