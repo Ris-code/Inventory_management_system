@@ -41,6 +41,14 @@
        margin-top: 10px; /* Adjust the spacing */
      }
    }
+
+   .panel input{
+       width: 100%;
+       padding: 12px 20px;
+       margin: 8px 0;
+       border: 1px solid #060606;
+       box-sizing: border-box;
+   }
  </style>
 </head>
 
@@ -78,7 +86,7 @@
                 <input type="date" id="borrowDate" class="form-control" placeholder="Enter the return date" required>
                 </span>
                
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
+                <!-- <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()"> -->
 
                 <div>
                 <button type="button" class="btn"  id="borrowButton" onclick="borrowItem()">Borrow</button>
@@ -90,6 +98,10 @@
               <!-- </div> -->
             <!-- </div> -->
           </div>
+
+          <div class="panel">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
+            </div>
 
           <div class="card-container" id="card-container">
             <!-- Cards will be dynamically added here using JavaScript -->

@@ -1301,6 +1301,7 @@ func club_borrow_list(w http.ResponseWriter, r *http.Request) {
 		filter := bson.M{"club_info.club": club, "club_info.borrow_status": "Yes"}
 
 		cur, err := collection.Find(context.Background(), filter)
+		fmt.Println("Cursor:", cur)
 
 		if err != nil {
 
@@ -1331,13 +1332,16 @@ func club_borrow_list(w http.ResponseWriter, r *http.Request) {
 			// Filter the student data to include only the "Sangam" club
 			var filteredClubInfo []Club_present
 			for _, c := range s.Club_info {
-				if c.Club == club {
+				if c.Club == club && c.Borrow_status == "Yes"  {
 					filteredClubInfo = append(filteredClubInfo, c)
 				}
 			}
+			fmt.Println("Filtered Club Info:", len(filteredClubInfo))
 			s.Club_info = filteredClubInfo
 
-			students = append(students, s)
+			if(len(filteredClubInfo) > 0) {
+				students = append(students, s)
+			}
 
 		}
 

@@ -58,7 +58,7 @@
    .panel input{
        width: 100%;
        padding: 12px 20px;
-       margin: 4px 0;
+       margin: 8px 0;
        border: 1px solid #060606;
        box-sizing: border-box;
    }
@@ -108,11 +108,11 @@
                   </div>
 
             </div>
-            <div class="panel">
+            <!-- <div class="panel">
             <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
-            </div>
+            </div> -->
                 <div>
-                <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return selected items</button>
+                <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return</button>
                 <div id="loading" style="display: none;">
                   <i class="fas fa-spinner fa-spin"></i> Returning items...
                 </div>
@@ -121,6 +121,10 @@
               <!-- </div> -->
             <!-- </div> -->
           </div>
+
+          <div class="panel">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
+            </div>
 
           <div class="card-container" id="card-container">
             <!-- Cards will be dynamically added here using JavaScript -->
@@ -181,8 +185,9 @@
         const cardContainer = document.getElementById('card-container');
 
         if (shoppingCart.length === 0) {
-            cardContainer.innerHTML = '<p style="color: black;">Your shopping cart is empty.</p>';
+            cardContainer.innerHTML = '<p style="color: black;">Your borrow cart is empty.</p>';
         } else {
+            cardContainer.innerHTML = '';
             for (let i = 0; i < shoppingCart.length; i++) {
                 const cartItem = shoppingCart[i];
                 const card = document.createElement('div');
