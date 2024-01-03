@@ -25,7 +25,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
+	"log"
 	"time"
+	"strings"
 )
 
 var db *sql.DB
@@ -49,12 +51,30 @@ func initDB() {
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
 	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbDatabase := os.Getenv("DB_NAME")
+
+	fmt.Println("DB User:", dbUser)
+	fmt.Println("DB Pass:", dbPass)
+	fmt.Println("DB Host:", dbHost)
+	fmt.Println("DB Port:", dbPort)
 
 	// Connect to the MySQL database
-	db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/club", dbUser, dbPass, dbHost))
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbDatabase)
+	db, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
+		fmt.Println("Error:", err)
 		panic(err)
 	}
+
+	// Check the connection
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("Error connecting to the database:", err)
+		panic(err)
+	}
+
+	fmt.Println("Connected to MySQL database!")
 }
 
 func initmongoDB() {
@@ -84,8 +104,24 @@ func initmongoDB() {
 }
 
 func home_before_login(w http.ResponseWriter, r *http.Request) {
-	t, _ := template.ParseFiles("templates/home_before_login.html")
-	t.Execute(w, nil)
+	t, err := template.ParseFiles("templates/home_before_login.html")
+	if err != nil {
+		log.Printf("Error parsing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("Panic during template execution: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}()
+
+	if err := t.Execute(w, nil); err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func home_after_login(w http.ResponseWriter, r *http.Request) {
@@ -519,6 +555,9 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		var confirm_password = r.FormValue("confirm-password")
 		var name = r.FormValue("name")
 		var id = r.FormValue("id")
+
+		// uppercase the id
+		id = strings.ToUpper(id)
 
 		fmt.Println("username:", username)
 		fmt.Println("password:", password)
@@ -1332,14 +1371,14 @@ func club_borrow_list(w http.ResponseWriter, r *http.Request) {
 			// Filter the student data to include only the "Sangam" club
 			var filteredClubInfo []Club_present
 			for _, c := range s.Club_info {
-				if c.Club == club && c.Borrow_status == "Yes"  {
+				if c.Club == club && c.Borrow_status == "Yes" {
 					filteredClubInfo = append(filteredClubInfo, c)
 				}
 			}
 			fmt.Println("Filtered Club Info:", len(filteredClubInfo))
 			s.Club_info = filteredClubInfo
 
-			if(len(filteredClubInfo) > 0) {
+			if len(filteredClubInfo) > 0 {
 				students = append(students, s)
 			}
 
@@ -1430,7 +1469,7 @@ func inventorylist(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func edit_inventory (w http.ResponseWriter, r *http.Request){
+func edit_inventory(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("method:", r.Method) // get request method
 
 	// r.ParseForm()
@@ -1472,7 +1511,7 @@ func edit_inventory (w http.ResponseWriter, r *http.Request){
 	w.Write([]byte(jsonData))
 }
 
-func delete_inventory (w http.ResponseWriter, r *http.Request){
+func delete_inventory(w http.ResponseWriter, r *http.Request) {
 	var requestData map[string]string
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

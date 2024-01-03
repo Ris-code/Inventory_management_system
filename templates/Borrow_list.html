@@ -215,7 +215,30 @@
     }
 
    // Function to handle returning an item
+// function returnItem(name, index) {
+//     // Add the card to the selectedCards array
+//     selectedCards.push({ name, index });
+
+//     // Enable the "Return All" button
+//     document.getElementById('borrowButton').disabled = false;
+
+//     // Disable the "Return" button if it exists
+//     const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
+//     if (returnButton) {
+//         returnButton.disabled = true;
+//     }
+// }
+
+// Function to handle returning an item
 function returnItem(name, index) {
+    // Check if the card is already present in the selectedCards array
+    const existingCardIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
+
+    if (existingCardIndex !== -1) {
+        // If the card is already present, update its position to the latest selected position
+        selectedCards.splice(existingCardIndex, 1);
+    }
+
     // Add the card to the selectedCards array
     selectedCards.push({ name, index });
 
@@ -228,6 +251,7 @@ function returnItem(name, index) {
         returnButton.disabled = true;
     }
 }
+
 
 // Function to handle canceling the return of an item
 function cancelReturn(name, index) {
@@ -254,6 +278,7 @@ function cancelReturn(name, index) {
   function returnAll() {
     // Array to store information about deleted items
     const deletedItems = [];
+    selectedCards.sort((a, b) => a.index - b.index);
     console.log("selected-cards",selectedCards);
 
     // Remove all selected cards from the array and collect information

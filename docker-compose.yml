@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql
+    container_name: db
+    env_file: .env
+    environment:
+      - MYSQL_PASSWORD=$DB_PASS
+      - MYSQL_USER=$DB_USER
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - 5000:3306
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    networks:
+      - inventory-management-network
+
+  myapp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: inventory-management
+    container_name: app
+    env_file: .env
+    environment:
+      - DB_USER
+      - DB_PASS
+      - DB_HOST 
+      - CONNECTION_STRING
+      - PASSWORD
+      - EMAIL
+    ports:
+      - 8000:8080
+    restart: unless-stopped
+    networks:
+      - inventory-management-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  inventory-management-network:
+    driver: bridge
+  
+volumes:
+  mysql-data:
