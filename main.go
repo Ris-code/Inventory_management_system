@@ -7,7 +7,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
-	// "github.com/gin-gonic/gin"
 )
 
 func main() {

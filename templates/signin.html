@@ -59,20 +59,6 @@
               <!-- <input type="submit" value="Log In" class="btn text-white btn-block btn-primary"> -->
               <button type="button" class="btn btn-block btn-primary" id="login-button" onclick="data()">Log In</button>
 
-              <!-- <span class="d-block text-left my-4 text-muted"> or sign in with</span>
-              
-              <div class="social-login">
-                <a href="#" class="facebook">
-                  <span class="icon-facebook mr-3"></span> 
-                </a>
-                <a href="#" class="twitter">
-                  <span class="icon-twitter mr-3"></span> 
-                </a>
-                <a href="#" class="google">
-                  <span class="icon-google mr-3"></span> 
-                </a>
-              </div> -->
-
               <span class="d-block text-left my-4 text-muted"> Don't have an account? <a href="/signup/" id="signup-link" style="color:  #38D39F;">Sign Up</a></span>
             </form>
             </div>
@@ -91,101 +77,6 @@
     <script src="/static/js/main.js"></script>
 
     <script>
-    //   function data(){
-    //     var username = document.getElementById("login-username").value;
-    //     var password = document.getElementById("login-password").value;
-    //     var data = {
-    //       "username": username,
-    //       "password": password
-    //     };
-    //     console.log(data);
-    //     // $.ajax({
-    //     //   type: "POST",
-    //     //   url: "/login/",
-    //     //   data: data,
-    //     //   success: function(data){
-    //     //     console.log(data);
-    //     //     window.location.href = `/home/${encodeURIComponent(username)}`;
-    //     //   }
-    //     // });
-
-
-    //     $.ajax({
-    //     type: "POST",
-    //     url: "/signin/",
-    //     data: data,
-    //     success: function(data) {
-    //         console.log(data);
-    //         if (data == "success") {
-    //             // window.location.href = '/home/' + encodeURIComponent(username);
-    //             req(username);
-    //         } else {
-    //             alert("Invalid Credentials");
-    //         }
-    //     },
-    //     error: function(error) {
-    //         console.log(error);
-    //     }
-    // });
-
-    //   }
-
-    // function req(username){
-    //     console.log(username);
-    //     var data = {
-    //         "username": username
-    //     };
-    //     console.log(data);
-        
-    //     $.ajax({
-    //         type: "POST",
-    //         url: "/home/",
-    //         data: data,
-    //         success: function(data) {
-    //             console.log(data);
-    //             window.location.href = "/home/";
-    //         },
-    //         error: function(error) {
-    //             console.log(error);
-    //         }
-    //     });
-    //   }
-
-  //   $(document).ready(function () {
-  //   $("#login-button").on("click", function () {
-  //     // Use the form ID to select the form element
-  //     var form = $("#login-form")[0];
-
-  //     // Use FormData to serialize the form data
-  //     var formData = new FormData(form);
-
-  //     $.ajax({
-  //       type: "POST",
-  //       url: "/signin/",
-  //       data: formData,
-  //       // The following options are necessary for working with FormData
-  //       contentType: false,
-  //       processData: false,
-  //       success: function (data) {
-  //         console.log(data);
-  //         var responseData = JSON.parse(data);
-  //         console.log(responseData);  
-
-  //         if (responseData.Username) {
-  //           sessionStorage.setItem("username", formData.get("login-username"));
-  //           sessionStorage.setItem("name", responseData.Username);
-  //           // window.location.href = "/home/";
-  //         } else {
-  //           alert("Invalid Credentials");
-  //         }
-  //       },
-  //       error: function (error) {
-  //         console.log(error);
-  //       },
-  //     });
-  //   });
-
-  // });
 
   function data(){
     var username = document.getElementById("login-username").value;

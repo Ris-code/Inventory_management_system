@@ -115,14 +115,6 @@
     <!-- Bootstrap core CSS -->
     <link href="/static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-<!--
-
-TemplateMo 570 Chain App Dev
-
-https://templatemo.com/tm-570-chain-app-dev
-
--->
-
     <!-- Additional CSS Files -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/assets/css/coordinator.css">
@@ -160,8 +152,6 @@ https://templatemo.com/tm-570-chain-app-dev
             <!-- ***** Menu Start ***** -->
             <ul class="nav">
               <li class="scroll-to-section"><a href="/clubhome/" class="active">Home</a></li>
-              <!-- <li class="scroll-to-section"><a href="#about">About</a></li> -->
-              <!-- <li class="scroll-to-section"><a href="#">Items Borrowed</a></li> -->
               <li class="scroll-to-section"><a href="/">Logout</a></li>
               <li class="scroll-to-section"></li>
             
@@ -302,8 +292,6 @@ https://templatemo.com/tm-570-chain-app-dev
       success: function (data) {
         // Do something on success
         console.log(data);
-        // response = JSON.parse(data);
-        // console.log(response.status);
         console.log(data.status);
 
         if (data.status === 'success') {
@@ -382,7 +370,6 @@ https://templatemo.com/tm-570-chain-app-dev
             contentType: "application/json",
             success: function(data){
                 console.log(data);
-                // sessionStorage.setItem("borrowlist", data);
                 window.location.href = "/clubborrowlist/";
             }
         });

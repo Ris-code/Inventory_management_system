@@ -17,298 +17,254 @@
   <script src="/static/js/club_data.js"></script>
 
   <style>
+    /* MEDIA QUERY */
+    @media (max-width: 60em) {
+      body {
+          padding: 3rem;
+      }
+
+      .main {
+          width: 100%; 
+      }
+
+    }
       
-    /* Follow me on:
-  https://dribbble.com/Curtis_A_Lee
-*/
-
-/* Check out my website:
-  https://thatboycurt.com/
-*/
-
-/* MEDIA QUERY */
-@media (max-width: 60em) {
-  body {
-      padding: 3rem;
-  }
-
-  .main {
-      width: 100%; 
-  }
-
-}
-/* body {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  padding: 6rem;
-  background: url("https://i.postimg.cc/G2Cf0PD6/3363857.jpg");
-
-  font-family: "Inter", sans-serif;
-} */
-  
-  /* VARIABLES */
-  :root {
-    --color-header: #0d0d0d;
-    --color-text: #404040;
-    --color-btn-text: #3363ff;
-    --color-btn-background: #e6ecff;
-    --transition: 0.2s;
-  }
-  
-  /* RESET */
-  *,
-  *::before,
-  *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: inherit;
-  }
-  
-  /* GLOBAL */
-  html {
-    box-sizing: border-box;
-    font-size: 62.5%; /* 10px/16px */
-  }
-
-
-  
-  /* MAIN CONTENT */
-  .grid {
-    display: grid;
-    width: 114rem;
-    grid-row-gap: 3rem;
-    grid-column-gap: 3rem;
-    grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
-    margin: 0 auto; /* Center the grid horizontally */
-    /* margin-top: 100px; */
-  }
-  
-  .grid .card {
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    border-radius: 0.4rem;
-    overflow: hidden;
-    box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: var(--transition);
-    height: 100%;
-  }
-  
-  .grid .card:hover {
-    transform: translateY(-0.5%);
-    box-shadow: 0 4rem 8rem rgba(0, 0, 0, 0.2);
-  }
-  
-  .grid .card__img {
-    display: block;
-    width: 100%;
-    height: 20rem;
-    object-fit: cover;
-  }
-  
-  .grid .card__content {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    grid-row-gap: 1rem;
-    padding: 2rem;
-    height: 100%;
-  }
-  
-  .grid .card__header {
-    font-size: 3rem;
-    font-weight: 500;
-    color: var(--color-header);
-    align-items: center;
-  }
-  
-  .grid .card__text {
-    font-size: 1.5rem;
-    letter-spacing: 0.1rem;
-    line-height: 1.7;
-    color: darken(var(--color-text), 1%);
-    margin-bottom: 1rem;
-  }
-  
-  .grid .card__btn {
-    display: block;
-    width: 100%;
-    padding: 1.5rem;
-    font-size: 2rem;
-    text-align: center;
-    color: var(--color-btn-text);
-    background-color: var(--color-btn-background);
-    border: none;
-    border-radius: 0.4rem;
-    transition: var(--transition);
-    cursor: pointer;
-    height: 100%;
-  }
-  
-  .grid .card__btn span {
-    margin-left: 1rem;
-    transition: var(--transition);
-  }
-  
-  .grid .card__btn:hover,
-  .grid .card__btn:active {
-    background-color: darken(var(--color-btn-background), 2%);
-  }
-  
-  .grid .card__btn:hover span {
-    margin-left: 1.5rem;
-  }
+      /* VARIABLES */
+      :root {
+        --color-header: #0d0d0d;
+        --color-text: #404040;
+        --color-btn-text: #3363ff;
+        --color-btn-background: #e6ecff;
+        --transition: 0.2s;
+      }
+      
+      /* RESET */
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: inherit;
+      }
+      
+      /* GLOBAL */
+      html {
+        box-sizing: border-box;
+        font-size: 62.5%; /* 10px/16px */
+      }
+ 
+      /* MAIN CONTENT */
+      .grid {
+        display: grid;
+        width: 114rem;
+        grid-row-gap: 3rem;
+        grid-column-gap: 3rem;
+        grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+        margin: 0 auto; /* Center the grid horizontally */
+      }
+      
+      .grid .card {
+        display: flex;
+        flex-direction: column;
+        background-color: #fff;
+        border-radius: 0.4rem;
+        overflow: hidden;
+        box-shadow: 0 3rem 6rem rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: var(--transition);
+        height: 100%;
+      }
+      
+      .grid .card:hover {
+        transform: translateY(-0.5%);
+        box-shadow: 0 4rem 8rem rgba(0, 0, 0, 0.2);
+      }
+      
+      .grid .card__img {
+        display: block;
+        width: 100%;
+        height: 20rem;
+        object-fit: cover;
+      }
+      
+      .grid .card__content {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        grid-row-gap: 1rem;
+        padding: 2rem;
+        height: 100%;
+      }
+      
+      .grid .card__header {
+        font-size: 3rem;
+        font-weight: 500;
+        color: var(--color-header);
+        align-items: center;
+      }
+      
+      .grid .card__text {
+        font-size: 1.5rem;
+        letter-spacing: 0.1rem;
+        line-height: 1.7;
+        color: darken(var(--color-text), 1%);
+        margin-bottom: 1rem;
+      }
+      
+      .grid .card__btn {
+        display: block;
+        width: 100%;
+        padding: 1.5rem;
+        font-size: 2rem;
+        text-align: center;
+        color: var(--color-btn-text);
+        background-color: var(--color-btn-background);
+        border: none;
+        border-radius: 0.4rem;
+        transition: var(--transition);
+        cursor: pointer;
+        height: 100%;
+      }
+      
+      .grid .card__btn span {
+        margin-left: 1rem;
+        transition: var(--transition);
+      }
+      
+      .grid .card__btn:hover,
+      .grid .card__btn:active {
+        background-color: darken(var(--color-btn-background), 2%);
+      }
+      
+      .grid .card__btn:hover span {
+        margin-left: 1.5rem;
+      }
 
 
-  h1 {
-    position: relative;
-    padding: 0;
-    margin: 0;
-    font-family: "Raleway", sans-serif;
-    font-weight: 300;
-    font-size: 40px;
-    color: #080808;
-    -webkit-transition: all 0.4s ease 0s;
-    -o-transition: all 0.4s ease 0s;
-    transition: all 0.4s ease 0s;
-  }
-  
-  h1 span {
-    display: block;
-    font-size: 0.5em;
-    line-height: 1.3;
-  }
-  h1 em {
-    font-style: normal;
-    font-weight: 600;
-  }
-  
-  .two h1 {
-    text-transform: capitalize;
-  }
-  .two h1:before {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 60px;
-    height: 2px;
-    content: "";
-    background-color: #c50000;
-  }
-  
-  .two h1 span {
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    line-height: 3em;
-    padding-left: 0.25em;
-    color: rgba(0, 0, 0, 0.4);
-    padding-bottom: 10px;
-  }
-  .two .alt-two{
-    margin-top: 100px;
-  }
-  
-  .alt-two h1 {
-    text-align:center;
-  }
-  .alt-two h1:before {
-    left:50%; margin-left:-30px;
-  }
+      h1 {
+        position: relative;
+        padding: 0;
+        margin: 0;
+        font-family: "Raleway", sans-serif;
+        font-weight: 300;
+        font-size: 40px;
+        color: #080808;
+        -webkit-transition: all 0.4s ease 0s;
+        -o-transition: all 0.4s ease 0s;
+        transition: all 0.4s ease 0s;
+      }
+      
+      h1 span {
+        display: block;
+        font-size: 0.5em;
+        line-height: 1.3;
+      }
+      h1 em {
+        font-style: normal;
+        font-weight: 600;
+      }
+      
+      .two h1 {
+        text-transform: capitalize;
+      }
+      .two h1:before {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 60px;
+        height: 2px;
+        content: "";
+        background-color: #c50000;
+      }
+      
+      .two h1 span {
+        font-size: 13px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        line-height: 3em;
+        padding-left: 0.25em;
+        color: rgba(0, 0, 0, 0.4);
+        padding-bottom: 10px;
+      }
+      .two .alt-two{
+        margin-top: 100px;
+      }
+      
+      .alt-two h1 {
+        text-align:center;
+      }
+      .alt-two h1:before {
+        left:50%; margin-left:-30px;
+      }
 
-  *,
-*:before,
-*:after {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-/* body {
-  background: #eee;
-} */
-.alt-two {
-  position: relative;
-  background: #f8f8f8;
-  width: 90%;
-  max-width: 500px;
-  padding: 2em;
-  margin: 3em auto;
-  margin-top: 100px;
-  border: 3px solid rgba(0, 0, 0, 0.08);
-}
+      *,
+    *:before,
+    *:after {
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+    }
+   
+    .alt-two {
+      position: relative;
+      background: #f8f8f8;
+      width: 90%;
+      max-width: 500px;
+      padding: 2em;
+      margin: 3em auto;
+      margin-top: 100px;
+      border: 3px solid rgba(0, 0, 0, 0.08);
+    }
 
-h1:before,
-h1:after {
-  background-color: #c50000;
-}
+    h1:before,
+    h1:after {
+      background-color: #c50000;
+    }
 
 
-/* MEDIA QUERY FOR RESPONSIVENESS */
-/* @media (max-width: 60em) {
-  .main {
-    padding: 2rem;
-  }
+    @media (max-width: 768px) {
+      .main {
+        padding: 2rem;
+      }
 
-  .grid {
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
-    grid-gap: 1rem;
-  }
+      .grid {
+        width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+        grid-gap: 1rem;
+      }
 
-  .card__img {
-    height: auto;
-  }
+      .card__img {
+        height: auto;
+      }
 
-  .card__content {
-    padding: 1rem;
-  }
-} */
+      .card__content {
+        padding: 1rem;
+      }
+    }
 
-@media (max-width: 768px) {
-  .main {
-    padding: 2rem;
-  }
+    @media (max-width: 480px) {
+      .heading {
+        font-size: 1.5rem;
+      }
 
-  .grid {
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
-    grid-gap: 1rem;
-  }
+      .alt-two h1:before {
+        left: 50%;
+        margin-left: -15px;
+      }
+    }
 
-  .card__img {
-    height: auto;
-  }
-
-  .card__content {
-    padding: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .heading {
-    font-size: 1.5rem;
-  }
-
-  .alt-two h1:before {
-    left: 50%;
-    margin-left: -15px;
-  }
-}
-
-.alt-two input {
-  width: 100%;
-  padding: 1em;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-size: 14px;
-  color: #666;
-  outline: none;
-  margin-bottom: 1em;
-  margin-top: 10px;
-  -webkit-appearance: none;
-}
+    .alt-two input {
+      width: 100%;
+      padding: 1em;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      font-size: 14px;
+      color: #666;
+      outline: none;
+      margin-bottom: 1em;
+      margin-top: 10px;
+      -webkit-appearance: none;
+    }
 
   </style>
   
@@ -316,7 +272,6 @@ h1:after {
 <body>
   <div id="nav-container"></div>
 <div class="main">  
-  <!-- <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()"> -->
 
     <div class="two alt-two">
             <h1 class="heading">Choose A Club
@@ -328,95 +283,10 @@ h1:after {
    
     
   <div class="grid" id="grid">
-
-    <!-- <div class="card">
-      <img class="card__img" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Snowy Mountains">
-      <div class="card__content">
-        <h1 class="card__header">Robotics Society</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Look up at the night sky, and find yourself <strong>immersed</strong> in the amazing mountain range of Aspen.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL01')">Borrow<span>&rarr;</span></button>
-      </div>
-    </div>
-
-    <div class="card">
-      <img class="card__img" src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Desert">
-      <div class="card__content">
-        <h1 class="card__header">Sangam</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Capture the stunning <strong>essence</strong> of the early morning sunrise in the Californian wilderness, and surround yourself in a world you never even knew existed.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL02')">Borrow<span>&rarr;</span></button>
-      </div>
-    </div>
-
-    <div class="card">
-      <img class="card__img" src="https://images.unsplash.com/photo-1608178398319-48f814d0750c?q=80&w=1779&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
-      <div class="card__content">
-        <h1 class="card__header">Nexus</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL03')">Borrow<span>&rarr;</span></button>
-      </div>
-    </div>
-
-    <div class="card">
-      <img class="card__img" src="https://images.unsplash.com/photo-1502209877429-d7c6df9eb3f9?q=80&w=2066&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
-      <div class="card__content">
-        <h1 class="card__header">FrameX</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL04')">Borrow <span>&rarr;</span></button>
-      </div>
-    </div>
-
-    <div class="card">
-      <img class="card__img" src="https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
-      <div class="card__content">
-        <h1 class="card__header">Shutterbugs</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL05')">Borrow <span>&rarr;</span></button>
-      </div>
-    </div>
-
-    <div class="card">
-      <img class="card__img" src="https://plus.unsplash.com/premium_photo-1673514503542-3953ca855a03?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Canyons">
-      <div class="card__content">
-        <h1 class="card__header">Arteliers</h1>
-        <div class="card__text-wrapper">
-          <p class="card__text">Sunsets over the <strong>stunning</strong> Utah Canyonlands, are truly something much more than incredible.</p>
-        </div>
-        <button class="card__btn" onclick="card('CL06')">Borrow<span>&rarr;</span></button>
-      </div>
-    </div> -->
   </div>
 </div>
 
 
-<!-- <script src="/static/js/club_data.js"></script> -->
-<!-- <script>
-  function card_1(id) {
-    // const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    console.log(id)
-    fetch(`/inventory/${encodeURIComponent(id)}/`, {
-        method: 'GET',
-        // headers: {
-        //     'Content-Type': 'application/json',
-        //     'X-CSRFToken': csrfToken,
-        // },
-    })
-    .then(response => response.json())
-    .then(data => {
-        
-    })
-    .catch(error => console.error('Error:', error));
-}
-</script> -->
 <script>
 
     function performSearch() {

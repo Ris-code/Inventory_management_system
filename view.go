@@ -304,14 +304,6 @@ func update(w http.ResponseWriter, r *http.Request) {
 	send_email(email_id, club_id, name, return_date, club, id, email_item_arr)
 }
 
-// func readHTMLTemplate(path string) (string, error) {
-// 	file, err := os.ReadFile(path)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return string(file), nil
-// }
-
 func send_email(email_id string, club_id string, name string, return_date string, club string, id string, items []email_Item) {
 	// Send an email to the club
 
@@ -1031,11 +1023,6 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 				panic(err.Error())
 			}
 
-			// temp := coordinator{
-			// 	club_name: name,
-			// 	club_id: id,
-			// }
-
 			club = append(club, name)
 		}
 		data := struct {
@@ -1073,18 +1060,6 @@ func coordinator_login(w http.ResponseWriter, r *http.Request) {
 
 			return
 		}
-
-		// if err != nil {
-		// 	// Username already exists
-		// 	fmt.Println("Unique ID does not exist")
-		// 	w.Write([]byte("unique_id"))
-
-		// 	return
-		// } else if err != sql.ErrNoRows {
-		// 	// If the error is of any other type, send a 500 status
-		// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		// 	return
-		// }
 
 		if existingClub != club {
 			// Passwords do not match

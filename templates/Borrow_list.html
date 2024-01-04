@@ -66,10 +66,6 @@
  </style>
 </head>
 
-<!-- ... (your HTML head) ... -->
-
-<!-- ... (your HTML head) ... -->
-
 <body>
   
   
@@ -89,11 +85,6 @@
           </div>
           
           <div class="d-flex justify-content-between align-items-center mb-4" style="gap: 10px;">
-            <!-- <div> -->
-              <!-- <h5 class="font-awesome mb-2 text-black" style="color: rgb(0, 0, 0);">Confirm the selected inventories</h5> -->
-                <!-- <button type="button" class="btn"  onclick="borrowItem()">Borrow</button> -->
-              <!-- <div class="panel-body"> -->
-                <!-- <input type="button" class="btn" value="Back" onclick="window.location.href='/inventory/'"> -->
                 <div>
                 <div class="form-group">
                     <!-- <label>Select your Club/Society:</label><br> -->
@@ -108,18 +99,12 @@
                   </div>
 
             </div>
-            <!-- <div class="panel">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by item name" oninput="performSearch()">
-            </div> -->
                 <div>
                 <button type="button" class="btn"  id="borrowButton" onclick="returnAll()">Return</button>
                 <div id="loading" style="display: none;">
                   <i class="fas fa-spinner fa-spin"></i> Returning items...
                 </div>
                 </div>
-
-              <!-- </div> -->
-            <!-- </div> -->
           </div>
 
           <div class="panel">
@@ -214,64 +199,49 @@
         }
     }
 
-   // Function to handle returning an item
-// function returnItem(name, index) {
-//     // Add the card to the selectedCards array
-//     selectedCards.push({ name, index });
+  // Function to handle returning an item
+  function returnItem(name, index) {
+      // Check if the card is already present in the selectedCards array
+      const existingCardIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
 
-//     // Enable the "Return All" button
-//     document.getElementById('borrowButton').disabled = false;
+      if (existingCardIndex !== -1) {
+          // If the card is already present, update its position to the latest selected position
+          selectedCards.splice(existingCardIndex, 1);
+      }
 
-//     // Disable the "Return" button if it exists
-//     const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
-//     if (returnButton) {
-//         returnButton.disabled = true;
-//     }
-// }
+      // Add the card to the selectedCards array
+      selectedCards.push({ name, index });
 
-// Function to handle returning an item
-function returnItem(name, index) {
-    // Check if the card is already present in the selectedCards array
-    const existingCardIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
+      // Enable the "Return All" button
+      document.getElementById('borrowButton').disabled = false;
 
-    if (existingCardIndex !== -1) {
-        // If the card is already present, update its position to the latest selected position
-        selectedCards.splice(existingCardIndex, 1);
-    }
-
-    // Add the card to the selectedCards array
-    selectedCards.push({ name, index });
-
-    // Enable the "Return All" button
-    document.getElementById('borrowButton').disabled = false;
-
-    // Disable the "Return" button if it exists
-    const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
-    if (returnButton) {
-        returnButton.disabled = true;
-    }
-}
+      // Disable the "Return" button if it exists
+      const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
+      if (returnButton) {
+          returnButton.disabled = true;
+      }
+  }
 
 
-// Function to handle canceling the return of an item
-function cancelReturn(name, index) {
-    // Remove the card from the selectedCards array
-    const selectedIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
-    if (selectedIndex !== -1) {
-        selectedCards.splice(selectedIndex, 1);
-    }
+  // Function to handle canceling the return of an item
+  function cancelReturn(name, index) {
+      // Remove the card from the selectedCards array
+      const selectedIndex = selectedCards.findIndex(card => card.name === name && card.index === index);
+      if (selectedIndex !== -1) {
+          selectedCards.splice(selectedIndex, 1);
+      }
 
-    // Enable the "Return" button if it exists
-    const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
-    if (returnButton) {
-        returnButton.disabled = false;
-    }
+      // Enable the "Return" button if it exists
+      const returnButton = document.querySelector(`#card-container .card:nth-child(${index + 1}) button:nth-child(4)`);
+      if (returnButton) {
+          returnButton.disabled = false;
+      }
 
-    // If there are no selected cards, disable the "Return All" button
-    if (selectedCards.length === 0) {
-        document.getElementById('borrowButton').disabled = true;
-    }
-}
+      // If there are no selected cards, disable the "Return All" button
+      if (selectedCards.length === 0) {
+          document.getElementById('borrowButton').disabled = true;
+      }
+  }
 
 
   // Function to handle returning all items
@@ -292,10 +262,7 @@ function cancelReturn(name, index) {
         console.log('Card Selector:', cardSelector);
         console.log('Card Element:', cardElement);
 
-// Rest of your code...
-
         // Get information from the deleted card
-        // const cardElement = document.querySelector(`#card-container .card:nth-child(${card.index + 1})`);
         var itemName = "";
         var returnDate = "";
         if (cardElement) {
@@ -442,12 +409,6 @@ function cancelReturn(name, index) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"></script>
-      <!-- <script>
-        $(function () {
-            $("#nav-container").load("/static/navbar.html");
-        });
-    </script> -->
-  
   </body>
   
   

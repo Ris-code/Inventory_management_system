@@ -67,10 +67,6 @@
  </style>
 </head>
 
-<!-- ... (your HTML head) ... -->
-
-<!-- ... (your HTML head) ... -->
-
 <body>
   
   <div class="modal fade" id="itemListModal" tabindex="-1" role="dialog" aria-labelledby="itemListModalLabel" aria-hidden="true">
@@ -247,7 +243,6 @@
                 console.log(data);
                 response = JSON.parse(data);
                 dynamiccard(response);
-                // console.log('Deleted items sent to the backend successfully:', data);
             },
             error: function(error) {
                 console.error('Error sending deleted items to the backend:', error);
