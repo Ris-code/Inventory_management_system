@@ -20,6 +20,22 @@ services:
       retries: 10
     networks:
       - inventory-management-network
+  
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    env_file: .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=MONGO_USER
+      - MONGO_INITDB_ROOT_PASSWORD=MONGO_PASSWORD
+      - MONGO_URI=CONNECTION_STRING
+    volumes:
+      - mongo-data:/var/lib/mongo
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+    networks:
+      - inventory-management-network
 
   myapp:
     build: 
@@ -50,3 +66,4 @@ networks:
   
 volumes:
   mysql-data:
+  mongo-data:
