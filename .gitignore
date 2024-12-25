@@ -2,3 +2,4 @@
 .private-key.pem
 .ssl.pem
 ca.pem
+.vercel
