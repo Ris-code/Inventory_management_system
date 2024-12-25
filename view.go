@@ -6,6 +6,10 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"crypto/tls"
+	"crypto/x509"
+
+	"github.com/go-sql-driver/mysql"
 
 	"bytes"
 	"encoding/json"
@@ -15,7 +19,6 @@ import (
 	"regexp"
 	"strconv"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
@@ -31,97 +34,81 @@ import (
 )
 
 var db *sql.DB
+var collection *mongo.Collection
 var err error
 
-var collection *mongo.Collection
-
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
 	}
-
-	// Initialize the database connection
 	initDB()
-	initmongoDB()
+	initMongoDB()
 }
 
 func initDB() {
-	// Read environment variables
-	dbUser := os.Getenv("DB_USER")
-	dbPass := os.Getenv("DB_PASS")
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbDatabase := os.Getenv("DB_NAME")
-
-	fmt.Println("DB User:", dbUser)
-	fmt.Println("DB Pass:", dbPass)
-	fmt.Println("DB Host:", dbHost)
-	fmt.Println("DB Port:", dbPort)
-
-	// Connect to the MySQL database
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbDatabase)
-	db, err = sql.Open("mysql", dataSourceName)
+	caCertPath := "ca.pem"
+	caCert, err := os.ReadFile(caCertPath)
 	if err != nil {
-		fmt.Println("Error:", err)
-		panic(err)
+		log.Fatalf("Error reading CA certificate: %v", err)
 	}
 
-	// Check the connection
-	err = db.Ping()
-	if err != nil {
-		fmt.Println("Error connecting to the database:", err)
-		panic(err)
+	rootCertPool := x509.NewCertPool()
+	if !rootCertPool.AppendCertsFromPEM(caCert) {
+		log.Fatal("Failed to append CA certificate")
 	}
 
-	fmt.Println("Connected to MySQL database!")
+	err = mysql.RegisterTLSConfig("custom", &tls.Config{
+		RootCAs: rootCertPool,
+	})
+	if err != nil {
+		log.Fatalf("Error registering custom TLS config: %v", err)
+	}
+
+	dsn := os.Getenv("DB_URI")
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("Error opening database connection: %v", err)
+	}
+
+	if err = db.Ping(); err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+
+	log.Println("Connected to the MySQL database!")
 }
 
-func initmongoDB() {
-	// Set client options
-	connection_string := os.Getenv("CONNECTION_STRING")
-	clientOptions := options.Client().ApplyURI(connection_string)
+func initMongoDB() {
+	connectionString := os.Getenv("CONNECTION_STRING")
+	clientOptions := options.Client().ApplyURI(connectionString)
 
-	// Connect to MongoDB
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error:", err)
-		return
+		log.Fatalf("Error connecting to MongoDB: %v", err)
+	}
+
+	if err = client.Ping(context.Background(), readpref.Primary()); err != nil {
+		log.Fatalf("Error pinging MongoDB: %v", err)
 	}
 
 	collection = client.Database("Student_inventory_list").Collection("Item_list")
+	log.Println("Connected to MongoDB!")
+}
 
-	// Check the connection
-	err = client.Ping(context.Background(), readpref.Primary())
-	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error:", err)
-		return
+func ensureDBInitialized(w http.ResponseWriter) bool {
+	if db == nil {
+		http.Error(w, "Database connection not initialized", http.StatusInternalServerError)
+		return false
 	}
-
-	fmt.Println("Connected to MongoDB!")
+	return true
 }
 
 func home_before_login(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("templates/home_before_login.html")
 	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
-
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Panic during template execution: %v", err)
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
-	}()
-
-	if err := t.Execute(w, nil); err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	t.Execute(w, nil)
 }
 
 func home_after_login(w http.ResponseWriter, r *http.Request) {
@@ -437,6 +424,10 @@ func inventory(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
+	if !ensureDBInitialized(w) {
+		return
+	}
+
 	fmt.Println("method:", r.Method) // get request method
 
 	if r.Method == "GET" {
@@ -1007,68 +998,89 @@ func send_return_email(username string, club string, id string, email_id string,
 // coordinator functions
 
 func coordinator_login(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("method:", r.Method) // get request method
+	if !ensureDBInitialized(w) {
+		return
+	}
+
+	fmt.Println("method:", r.Method) // log request method
 
 	if r.Method == "GET" {
-		result, _ := db.Query("SELECT club_id, club FROM clubs")
-
-		var club []string
-
-		for result.Next() {
-			var id string
-			var name string
-
-			err = result.Scan(&id, &name)
-			if err != nil {
-				panic(err.Error())
-			}
-
-			club = append(club, name)
-		}
-		data := struct {
-			Items []string
-		}{
-			Items: club,
-		}
-		fmt.Println("Club:", club)
-
-		jsonData, err := json.Marshal(data)
-
+		// Query database for clubs
+		rows, err := db.Query("SELECT club_id, club FROM clubs")
 		if err != nil {
-			// Handle the error
+			log.Printf("Error querying clubs: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var clubs []string
+		for rows.Next() {
+			var id, name string
+			if err := rows.Scan(&id, &name); err != nil {
+				log.Printf("Error scanning row: %v", err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			clubs = append(clubs, name)
+		}
+
+		// Handle potential errors from rows iteration
+		if err = rows.Err(); err != nil {
+			log.Printf("Error iterating rows: %v", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		t, _ := template.ParseFiles("templates/club_signin.html")
-		t.Execute(w, template.JS(jsonData))
+		data := struct {
+			Items []string
+		}{
+			Items: clubs,
+		}
+		fmt.Println("Clubs:", clubs)
+
+		// Convert to JSON and serve the HTML
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			log.Printf("Error marshalling data: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		tmpl, err := template.ParseFiles("templates/club_signin.html")
+		if err != nil {
+			log.Printf("Error loading template: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		tmpl.Execute(w, template.JS(jsonData))
 	} else if r.Method == "POST" {
 		r.ParseForm()
-		// logic part of sign up
-		var club = r.FormValue("club")
-		var id = r.FormValue("id")
+		club := r.FormValue("club")
+		id := r.FormValue("id")
 
 		fmt.Println("club:", club)
 		fmt.Println("id:", id)
-		// Check if username already exists
-		result := db.QueryRow("SELECT club FROM clubs WHERE unique_id=?", id)
 
 		var existingClub string
-		if err := result.Scan(&existingClub); err != nil {
-			fmt.Println("Unique ID does not exist")
-			w.Write([]byte("unique_id"))
-
+		err := db.QueryRow("SELECT club FROM clubs WHERE unique_id=?", id).Scan(&existingClub)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "Invalid Unique ID", http.StatusUnauthorized)
+				return
+			}
+			log.Printf("Error querying club: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		if existingClub != club {
-			// Passwords do not match
-			w.Write([]byte("not_club"))
-			// http.Redirect(w, r, "/signup/", http.StatusSeeOther)
+			http.Error(w, "Club name does not match Unique ID", http.StatusUnauthorized)
 			return
 		}
 
-		fmt.Println("Entered successfully")
+		fmt.Println("Coordinator login successful")
 		w.Write([]byte("success"))
 	} else {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)

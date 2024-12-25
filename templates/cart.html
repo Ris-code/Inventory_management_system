@@ -131,6 +131,8 @@
         // Get the data parameter from the URL
         const queryParams = getQueryParams();
         const cartData = queryParams.data;
+
+        // const cartData = localStorage.getItem('cartData');
   
         // Parse the JSON string into an array
         const shoppingCart = JSON.parse(cartData);
