@@ -46,14 +46,16 @@ func init() {
 }
 
 func initDB() {
-	caCertPath := "ca.pem"
-	caCert, err := os.ReadFile(caCertPath)
-	if err != nil {
-		log.Fatalf("Error reading CA certificate: %v", err)
-	}
+	// caCertPath := "ca.pem"
+	caCert := os.Getenv("CA_CERT")
+	caCert = strings.ReplaceAll(caCert, "\\n", "\n")
+
+	// if err != nil {
+	// 	log.Fatalf("Error reading CA certificate: %v", err)
+	// }
 
 	rootCertPool := x509.NewCertPool()
-	if !rootCertPool.AppendCertsFromPEM(caCert) {
+	if !rootCertPool.AppendCertsFromPEM([]byte(caCert)) {
 		log.Fatal("Failed to append CA certificate")
 	}
 
